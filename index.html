@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Panel de Control — Bitácora Preventiva</title>
+<title>Tablero de Control — Bitácora Preventiva</title>
 <style>
   :root{
     --bg:#0d0f14; --card:#191c24; --card2:#212531; --line:#2d3340;
@@ -15,81 +15,61 @@
   .container{max-width:600px; margin:0 auto; padding:16px;}
   
   h1{font-size:20px; margin:0 0 4px;}
-  .subtitle{font-size:13px; color:var(--sub); margin-bottom:16px; display:flex; align-items:center; gap:8px;}
+  .subtitle{font-size:13px; color:var(--sub); margin-bottom:16px;}
   
   .card{background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:14px; border:1px solid var(--line);}
-  .card-title{font-size:14px; font-weight:600; margin-bottom:12px; color:var(--text); display:flex; align-items:center; gap:8px;}
+  .card-title{font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text);}
+  
+  /* Banner de estado */
+  .status-banner{padding:14px; border-radius:10px; font-weight:700; font-size:15px; text-align:center; margin-bottom:14px;}
+  .status-ok{background:#123322; color:var(--good);}
+  .status-warning{background:#3a2410; color:var(--warn);}
+  .status-alert{background:#3a1010; color:var(--bad);}
+  
+  /* Tabla */
+  .data-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .data-table th{text-align:left; color:var(--sub); font-weight:600; padding:8px 6px; border-bottom:2px solid var(--line); text-transform:uppercase; font-size:11px; letter-spacing:.05em;}
+  .data-table td{padding:10px 6px; border-bottom:1px solid var(--line);}
+  .data-table tr:last-child td{border-bottom:none;}
+  
+  .tag{display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;}
+  .tag-active{background:#123322; color:var(--good);}
+  .tag-inactive{background:#3a1010; color:var(--bad);}
   
   /* Métricas */
-  .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .metric{background:var(--card2); border-radius:10px; padding:16px; text-align:center;}
-  .metric-value{font-size:28px; font-weight:700; color:var(--accent);}
-  .metric-label{font-size:11px; color:var(--sub); margin-top:4px; text-transform:uppercase; letter-spacing:.05em;}
+  .metric-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .metric{background:var(--card2); border-radius:10px; padding:14px 8px; text-align:center;}
+  .metric-value{font-size:22px; font-weight:700; color:var(--accent);}
+  .metric-label{font-size:10px; color:var(--sub); margin-top:4px; text-transform:uppercase;}
   
-  /* Períodos */
-  .period-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;}
-  .period-item{background:var(--card2); border-radius:10px; padding:12px 6px; text-align:center; border:1px solid var(--line);}
-  .period-item.highlight{background:var(--accent); border-color:var(--accent);}
-  .period-item.highlight .period-value{color:#fff;}
-  .period-item.highlight .period-label{color:rgba(255,255,255,.8);}
-  .period-value{font-size:18px; font-weight:700; color:var(--text);}
-  .period-label{font-size:9px; color:var(--sub); text-transform:uppercase;}
+  /* Alertas */
+  .alert-item{background:var(--card2); border-radius:8px; padding:10px 12px; margin-bottom:8px; border-left:4px solid var(--warn); font-size:13px;}
+  .alert-item.critical{border-left-color:var(--bad);}
+  .alert-item.info{border-left-color:var(--accent);}
   
-  /* Progreso */
-  .progress-bar{height:10px; background:var(--card2); border-radius:5px; overflow:hidden; margin-top:12px;}
-  .progress-fill{height:100%; background:var(--accent); border-radius:5px; transition:width .5s ease;}
-  .progress-pct{text-align:center; font-size:12px; color:var(--sub); margin-top:8px; font-weight:600;}
-  
-  /* Estado */
-  .status-dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; animation:pulse 2s infinite;}
-  .status-green{background:var(--good);}
-  .status-yellow{background:var(--warn);}
-  .status-red{background:var(--bad);}
-  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.4;}}
-  
-  /* Cola de aprobación */
-  .approval-item{background:var(--card2); border-radius:10px; padding:14px; margin-bottom:10px; border:1px solid var(--line);}
-  .a-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
-  .a-code{font-weight:700; font-size:15px; color:var(--text);}
-  .a-ml{font-size:20px; font-weight:700; color:var(--accent);}
-  .a-detail{font-size:12px; color:var(--sub);}
-  .approval-actions{display:flex; gap:8px; margin-top:12px;}
-  .btn-approve{flex:1; padding:12px; border-radius:8px; background:var(--good); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
-  .btn-reject{flex:1; padding:12px; border-radius:8px; background:var(--bad); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
-  .comentario-input{width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:14px; margin-top:10px; display:none;}
-  .btn-confirmar-rechazo{display:none; margin-top:8px; width:100%; padding:10px; border-radius:8px; background:var(--bad); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
-  
-  /* Botón refrescar */
-  .refresh-btn{width:100%; padding:14px; border-radius:10px; background:var(--accent); color:#fff; border:none; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:16px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px;}
+  /* Botón */
+  .refresh-btn{width:100%; padding:14px; border-radius:10px; background:var(--accent); color:#fff; border:none; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:16px; font-family:inherit;}
   .refresh-btn:active{opacity:.7;}
   
-  /* Selector de auto-recarga */
-  .auto-refresh-box{display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:12px; color:var(--sub);}
+  .auto-refresh-box{display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:12px; color:var(--sub); flex-wrap:wrap;}
   .auto-refresh-box select{padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--card2); color:var(--text); font-size:12px; font-family:inherit;}
   
-  /* Estado vacío */
-  .empty-state{text-align:center; padding:30px 20px; color:var(--sub); font-size:14px;}
+  .last-update{font-size:11px; color:var(--sub); width:100%;}
   
-  /* Toast */
-  .toast{position:fixed; bottom:16px; left:16px; right:16px; max-width:568px; margin:0 auto; background:var(--card2); border:1px solid var(--accent); padding:12px 14px; border-radius:10px; font-size:13px; display:none; z-index:60; color:var(--text);}
+  .empty-state{text-align:center; padding:20px; color:var(--sub); font-size:13px;}
+  
+  .toast{position:fixed; bottom:16px; left:16px; right:16px; max-width:568px; margin:0 auto; background:var(--card2); border:1px solid var(--accent); padding:12px 14px; border-radius:10px; font-size:13px; display:none; z-index:60;}
   .toast.show{display:block;}
-  
-  /* Última actualización */
-  .last-update{font-size:11px; color:var(--sub); text-align:center; margin-top:4px;}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>📊 Panel de Control</h1>
-  <div class="subtitle">
-    <span class="status-dot status-green" id="status-indicator"></span>
-    <span id="status-text">Conectado</span>
-  </div>
+  <h1>📊 Tablero de Control</h1>
+  <div class="subtitle" id="last-update">🕐 Actualizado: —</div>
   
   <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar ahora</button>
   
-  <!-- AUTO-RECARGA -->
   <div class="auto-refresh-box">
     <span>Auto-recarga:</span>
     <select id="auto-refresh-select" onchange="cambiarAutoRefresh()">
@@ -98,78 +78,40 @@
       <option value="300" selected>Cada 5 minutos</option>
       <option value="600">Cada 10 minutos</option>
       <option value="1800">Cada 30 minutos</option>
-      <option value="3600">Cada 1 hora</option>
     </select>
-    <span class="last-update" id="last-update"></span>
   </div>
   
-  <!-- PERÍODOS -->
+  <!-- ESTADO GENERAL -->
+  <div id="estado-general"></div>
+  
+  <!-- 1️⃣ AHORA -->
   <div class="card">
-    <div class="card-title">📅 Períodos</div>
-    <div class="period-grid">
-      <div class="period-item highlight">
-        <div class="period-value" id="val-ahora-ml">—</div>
-        <div class="period-label">Ahora</div>
-      </div>
-      <div class="period-item">
-        <div class="period-value" id="val-ayer-ml">—</div>
-        <div class="period-label">Ayer</div>
-      </div>
-      <div class="period-item">
-        <div class="period-value" id="val-semana-ml">—</div>
-        <div class="period-label">Semana</div>
-      </div>
-      <div class="period-item">
-        <div class="period-value" id="val-mes-ml">—</div>
-        <div class="period-label">Mes</div>
-      </div>
-      <div class="period-item">
-        <div class="period-value" id="val-anio-ml">—</div>
-        <div class="period-label">Año</div>
-      </div>
-    </div>
+    <div class="card-title">1️⃣ AHORA — ¿Quién está enviando datos?</div>
+    <div id="ahora-content"></div>
   </div>
   
-  <!-- META MENSUAL -->
+  <!-- 2️⃣ AYER -->
   <div class="card">
-    <div class="card-title">🎯 Meta Mensual</div>
-    <div class="metric-grid">
-      <div class="metric">
-        <div class="metric-value" id="meta-ml">—</div>
-        <div class="metric-label">Meta ML</div>
-      </div>
-      <div class="metric">
-        <div class="metric-value" id="meta-acumulado">—</div>
-        <div class="metric-label">Acumulado</div>
-      </div>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="meta-progress" style="width:0%;"></div>
-    </div>
-    <div class="progress-pct" id="meta-pct">0% cumplido</div>
+    <div class="card-title">2️⃣ AYER — ¿Qué pasó y qué decidir?</div>
+    <div id="ayer-content"></div>
   </div>
   
-  <!-- M3 CONSUMO -->
+  <!-- 3️⃣ SEMANA -->
   <div class="card">
-    <div class="card-title">💧 Consumo de Agua</div>
-    <div class="metric-grid">
-      <div class="metric">
-        <div class="metric-value" id="m3-mes">—</div>
-        <div class="metric-label">Este mes</div>
-      </div>
-      <div class="metric">
-        <div class="metric-value" id="m3-anio">—</div>
-        <div class="metric-label">Este año</div>
-      </div>
-    </div>
+    <div class="card-title">3️⃣ SEMANA — ¿Cómo estuvo?</div>
+    <div id="semana-content"></div>
   </div>
   
-  <!-- COLA DE APROBACIÓN -->
+  <!-- 4️⃣ META -->
   <div class="card">
-    <div class="card-title">🔍 Turnos pendientes de revisión</div>
-    <div id="aprobacion-lista">
-      <div class="empty-state">Cargando...</div>
-    </div>
+    <div class="card-title">4️⃣ META — ¿Vamos a cumplir?</div>
+    <div id="meta-content"></div>
+  </div>
+  
+  <!-- HOY — ACCIONES -->
+  <div class="card">
+    <div class="card-title">📌 HOY — Acciones</div>
+    <div id="acciones-content"></div>
   </div>
 </div>
 
@@ -177,10 +119,8 @@
 
 <script>
 /* ==================== CONFIGURACIÓN ==================== */
-// ✅ URL YA INTEGRADA — NO NECESITAS CAMBIAR NADA
-const DASHBOARD_URL = "https://script.google.com/macros/s/AKfycbzQizcyWqBMf-q71BmrErM4Co733Vz3t4ORhl0BuCHt3kaLR87h-eWJMcwuXY4m0tNHqQ/exec";
+const DASHBOARD_URL = "https://script.google.com/macros/s/AKfycbxZhkBl2PEhDBkHpPgpRLeKIhoKOIx6TV11pQFHTauYkPjV3jKxC-qr56d7oXtcKZQ/exec";
 
-let datosDashboard = null;
 let autoRefreshInterval = null;
 
 /* ==================== UTILIDADES ==================== */
@@ -190,234 +130,208 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-function actualizarEstado(status, text){
-  const dot = document.getElementById('status-indicator');
-  const txt = document.getElementById('status-text');
-  
-  dot.className = 'status-dot ' + status;
-  txt.textContent = text;
-}
-
-function actualizarUltimaCarga(){
-  const ahora = new Date();
-  const hora = ahora.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  document.getElementById('last-update').textContent = 'Actualizado: ' + hora;
-}
+function num(val){ const n = Number(val); return isNaN(n) ? 0 : n; }
 
 /* ==================== AUTO-RECARGA ==================== */
 function cambiarAutoRefresh(){
   const select = document.getElementById('auto-refresh-select');
   const segundos = parseInt(select.value);
   
-  // Limpiar intervalo anterior
-  if(autoRefreshInterval){
-    clearInterval(autoRefreshInterval);
-    autoRefreshInterval = null;
-  }
+  if(autoRefreshInterval) clearInterval(autoRefreshInterval);
   
-  // Crear nuevo intervalo si no está desactivado
   if(segundos > 0){
     autoRefreshInterval = setInterval(cargarDatos, segundos * 1000);
     toast('🔄 Auto-recarga: cada ' + Math.round(segundos/60) + ' min');
-  } else {
-    toast('🔄 Auto-recarga desactivada');
   }
 }
 
 /* ==================== CARGAR DATOS ==================== */
 async function cargarDatos(){
-  actualizarEstado('status-yellow', 'Cargando...');
-  
   try{
     const resp = await fetch(DASHBOARD_URL);
     const texto = await resp.text();
+    const data = JSON.parse(texto);
     
-    try{
-      const data = JSON.parse(texto);
-      if(data.ok && data.data){
-        procesarDatos(data.data);
-        actualizarEstado('status-green', 'Conectado');
-        actualizarUltimaCarga();
-      } else {
-        actualizarEstado('status-red', 'Sin datos');
-        mostrarError(data.error || 'No se pudieron cargar los datos. Ejecuta "generarTodo" en Apps Script.');
-      }
-    }catch(e){
-      actualizarEstado('status-red', 'Error');
-      mostrarError('Respuesta no válida del servidor');
+    if(data.ok && data.data){
+      procesarDatos(data.data);
+      actualizarUltimaCarga();
+    } else {
+      mostrarError(data.error || 'Sin datos. Ejecuta generarTodo.');
     }
   }catch(e){
-    actualizarEstado('status-red', 'Sin conexión');
-    mostrarError('Error de conexión: ' + e.message);
+    mostrarError('Error de conexión');
   }
 }
 
+function actualizarUltimaCarga(){
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString('es-CO');
+  const hora = ahora.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('last-update').textContent = `🕐 Actualizado: ${fecha} ${hora}`;
+}
+
 function mostrarError(msg){
-  document.getElementById('aprobacion-lista').innerHTML = `
-    <div class="empty-state">
-      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
-      ${msg}
-    </div>`;
+  document.getElementById('estado-general').innerHTML = `
+    <div class="status-banner status-alert">🔴 Error: ${msg}</div>`;
 }
 
 /* ==================== PROCESAR DATOS ==================== */
 function procesarDatos(data){
-  datosDashboard = data;
+  const mlAhora = num(data[1][1]);
+  const turnosAhora = num(data[1][3]);
+  const mlAyer = num(data[2][1]);
+  const turnosAyer = num(data[2][3]);
+  const mlSemana = num(data[3][1]);
+  const turnosSemana = num(data[3][3]);
+  const metaMes = num(data[7][1]);
+  const mlMes = num(data[8][1]);
+  const pct = parseFloat(String(data[9][1]).replace('%','')) || 0;
   
-  if(data.length < 6){
-    mostrarError('Datos incompletos en Dashboard Sheet');
+  renderEstadoGeneral(pct, mlAhora);
+  renderAhora(data, turnosAhora, mlAhora);
+  renderAyer(mlAyer, turnosAyer);
+  renderSemana(mlSemana, turnosSemana);
+  renderMeta(metaMes, mlMes, pct);
+  renderAcciones(data);
+}
+
+/* ==================== ESTADO GENERAL ==================== */
+function renderEstadoGeneral(pct, mlAhora){
+  const el = document.getElementById('estado-general');
+  
+  if(pct >= 100){
+    el.innerHTML = `<div class="status-banner status-ok">✅ Meta cumplida — ${pct}%</div>`;
+  } else if(mlAhora === 0 && pct < 40){
+    el.innerHTML = `<div class="status-banner status-alert">🔴 Atención inmediata — ${pct}% de meta y sin actividad ahora</div>`;
+  } else if(pct < 40){
+    el.innerHTML = `<div class="status-banner status-alert">🔴 Atención inmediata — ${pct}% de meta</div>`;
+  } else if(pct < 70){
+    el.innerHTML = `<div class="status-banner status-warning">🟡 En progreso — ${pct}% de meta</div>`;
+  } else {
+    el.innerHTML = `<div class="status-banner status-ok">✅ En camino — ${pct}% de meta</div>`;
+  }
+}
+
+/* ==================== 1️⃣ AHORA ==================== */
+function renderAhora(data, turnos, ml){
+  const el = document.getElementById('ahora-content');
+  
+  if(turnos === 0){
+    el.innerHTML = `<div class="empty-state">Sin actividad en este momento.</div>`;
     return;
   }
   
-  // Períodos
-  document.getElementById('val-ahora-ml').textContent = formatML(data[1][1]);
-  document.getElementById('val-ayer-ml').textContent = formatML(data[2][1]);
-  document.getElementById('val-semana-ml').textContent = formatML(data[3][1]);
-  document.getElementById('val-mes-ml').textContent = formatML(data[4][1]);
-  document.getElementById('val-anio-ml').textContent = formatML(data[5][1]);
-  
-  // Meta mensual
-  const metaML = data[7] ? Number(data[7][1]) : 0;
-  const acumuladoML = data[8] ? Number(data[8][1]) : 0;
-  const pctStr = data[9] ? String(data[9][1]).replace('%','') : '0';
-  const pct = parseFloat(pctStr) || 0;
-  
-  document.getElementById('meta-ml').textContent = formatML(metaML);
-  document.getElementById('meta-acumulado').textContent = formatML(acumuladoML);
-  document.getElementById('meta-pct').textContent = pct + '% cumplido';
-  
-  const pctWidth = Math.min(pct, 100);
-  document.getElementById('meta-progress').style.width = pctWidth + '%';
-  
-  if(pct >= 100){
-    document.getElementById('meta-progress').style.background = 'var(--good)';
-  } else if(pct >= 70){
-    document.getElementById('meta-progress').style.background = 'var(--accent)';
-  } else if(pct >= 40){
-    document.getElementById('meta-progress').style.background = 'var(--warn)';
-  } else {
-    document.getElementById('meta-progress').style.background = 'var(--bad)';
-  }
-  
-  // M3
-  document.getElementById('m3-mes').textContent = formatM3(data[4][2]);
-  document.getElementById('m3-anio').textContent = formatM3(data[5][2]);
-  
-  // Cola de aprobación
-  renderColaAprobacion(data);
-}
-
-function formatML(val){
-  const num = Number(val);
-  if(isNaN(num)) return '—';
-  return Math.round(num);
-}
-
-function formatM3(val){
-  const num = Number(val);
-  if(isNaN(num)) return '—';
-  return Math.round(num * 10) / 10;
-}
-
-/* ==================== COLA DE APROBACIÓN ==================== */
-function renderColaAprobacion(data){
-  const lista = document.getElementById('aprobacion-lista');
-  
+  // Buscar códigos de turnos pendientes
   const pendientes = [];
   for(let r = 12; r < data.length; r++){
     if(data[r][1] && String(data[r][1]).trim() !== ''){
       pendientes.push({
         codigo: String(data[r][1]).trim(),
-        ml: Number(data[r][2]) || 0
+        ml: num(data[r][2])
       });
     }
   }
   
-  if(pendientes.length === 0){
-    lista.innerHTML = `
-      <div class="empty-state">
-        <div style="font-size:32px; margin-bottom:8px;">✅</div>
-        No hay turnos pendientes de revisión
-      </div>`;
+  let tabla = '';
+  pendientes.forEach(p => {
+    tabla += `<tr><td>${p.codigo}</td><td>—</td><td>${p.ml}</td><td><span class="tag tag-active">Activo</span></td></tr>`;
+  });
+  
+  el.innerHTML = `
+    <table class="data-table">
+      <tr><th>Placa</th><th>Barrio</th><th>Envíos</th><th>Estado</th></tr>
+      ${tabla || '<tr><td colspan="4" class="empty-state">Sin detalle</td></tr>'}
+    </table>
+    <div style="margin-top:10px; font-size:12px; color:var(--sub);">ML en curso: ${ml}</div>`;
+}
+
+/* ==================== 2️⃣ AYER ==================== */
+function renderAyer(ml, turnos){
+  const el = document.getElementById('ayer-content');
+  
+  if(turnos === 0){
+    el.innerHTML = `<div class="empty-state">Sin turnos cerrados ayer.</div>`;
+    return;
+  }
+  
+  const metaDia = 250;
+  const metaTotal = metaDia * turnos;
+  const delta = ml - metaTotal;
+  const deltaStr = delta >= 0 ? `✅ +${delta}` : `❌ ${delta}`;
+  
+  el.innerHTML = `
+    ML: ${ml} │ Meta: ${metaTotal} │ ${deltaStr}<br>
+    <span style="font-size:12px; color:var(--sub);">Tramos SI: ${turnos} │ Jornadas: ${turnos}</span>`;
+}
+
+/* ==================== 3️⃣ SEMANA ==================== */
+function renderSemana(ml, turnos){
+  const el = document.getElementById('semana-content');
+  
+  if(turnos === 0){
+    el.innerHTML = `<div class="empty-state">Sin actividad esta semana.</div>`;
+    return;
+  }
+  
+  const presupuesto = turnos * 250;
+  const delta = ml - presupuesto;
+  const deltaStr = delta >= 0 ? `+${delta} ML ✅` : `${delta} ML ❌`;
+  
+  el.innerHTML = `
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-value">${ml}</div><div class="metric-label">ML / ${turnos} J</div></div>
+      <div class="metric"><div class="metric-value">${presupuesto}</div><div class="metric-label">Presupuesto</div></div>
+      <div class="metric"><div class="metric-value">${deltaStr}</div><div class="metric-label">Δ</div></div>
+    </div>`;
+}
+
+/* ==================== 4️⃣ META ==================== */
+function renderMeta(meta, mlMes, pct){
+  const el = document.getElementById('meta-content');
+  
+  const estadoMeta = pct >= 100 ? '✅ Cumplida' : pct >= 70 ? '🟡 En progreso' : '🔴 En riesgo';
+  
+  el.innerHTML = `
+    Mes: ${mlMes} de ${meta} │ ${pct}% │ ${estadoMeta}
+    <div style="height:8px; background:var(--card2); border-radius:4px; overflow:hidden; margin-top:10px;">
+      <div style="height:100%; width:${Math.min(pct,100)}%; background:${pct>=70?'var(--good)':pct>=40?'var(--accent)':'var(--bad)'}; border-radius:4px;"></div>
+    </div>`;
+}
+
+/* ==================== HOY — ACCIONES ==================== */
+function renderAcciones(data){
+  const el = document.getElementById('acciones-content');
+  const acciones = [];
+  
+  for(let r = 12; r < data.length; r++){
+    if(data[r][1] && String(data[r][1]).trim() !== ''){
+      acciones.push({
+        codigo: String(data[r][1]).trim(),
+        ml: num(data[r][2])
+      });
+    }
+  }
+  
+  if(acciones.length === 0){
+    el.innerHTML = `<div class="empty-state">✅ Sin acciones pendientes.</div>`;
     return;
   }
   
   let html = '';
-  pendientes.forEach((p, index)=>{
+  acciones.forEach(p => {
     html += `
-      <div class="approval-item">
-        <div class="a-header">
-          <span class="a-code">${p.codigo}</span>
-          <span class="a-ml">${Math.round(p.ml)} ML</span>
-        </div>
-        <div class="a-detail">
-          <span class="status-dot status-yellow"></span>
-          Pendiente de visto bueno
-        </div>
-        <div class="approval-actions">
-          <button class="btn-approve" onclick="aprobarTurno('${p.codigo}', ${index})">✅ Aprobar</button>
-          <button class="btn-reject" onclick="mostrarComentario(${index})">❌ Rechazar</button>
-        </div>
-        <input type="text" class="comentario-input" id="comentario-${index}" placeholder="Motivo del rechazo (obligatorio)">
-        <button class="btn-confirmar-rechazo" id="btn-rechazar-${index}" onclick="rechazarTurno('${p.codigo}', ${index})">Confirmar rechazo</button>
+      <div class="alert-item info">
+        <strong>${p.codigo}</strong> — ${p.ml} ML pendiente de aprobación
       </div>`;
   });
   
-  lista.innerHTML = html;
-}
-
-function mostrarComentario(index){
-  const input = document.getElementById('comentario-' + index);
-  const btn = document.getElementById('btn-rechazar-' + index);
-  input.style.display = 'block';
-  btn.style.display = 'block';
-  input.focus();
-}
-
-async function aprobarTurno(codigo, index){
-  await enviarAprobacion(codigo, 'SI', '');
-  toast('✅ Turno ' + codigo + ' aprobado');
-  setTimeout(cargarDatos, 1000);
-}
-
-async function rechazarTurno(codigo, index){
-  const comentario = document.getElementById('comentario-' + index).value.trim();
-  if(!comentario){
-    toast('❌ Escribe el motivo del rechazo');
-    return;
-  }
-  
-  await enviarAprobacion(codigo, 'NO', comentario);
-  toast('❌ Turno ' + codigo + ' rechazado');
-  setTimeout(cargarDatos, 1000);
-}
-
-async function enviarAprobacion(codigo, aprobado, comentario){
-  const payload = {
-    accion: 'aprobarTurno',
-    codigo: codigo,
-    aprobado: aprobado,
-    comentario: comentario
-  };
-  
-  try{
-    await fetch(DASHBOARD_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(payload)
-    });
-  }catch(e){
-    console.error('Error enviando aprobación:', e);
-  }
+  el.innerHTML = html;
 }
 
 /* ==================== INICIO ==================== */
 window.addEventListener('load', ()=>{
   cargarDatos();
-  cambiarAutoRefresh(); // Inicia con 5 minutos por defecto
+  cambiarAutoRefresh();
 });
 </script>
 </body>
