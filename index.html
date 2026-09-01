@@ -2,10 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tablero de Control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Panorámico — Supervisor</title>
 <style>
-  :root{--bg:#0d0f14;--card:#191c24;--card2:#212531;--line:#2d3340;--text:#f0f1f5;--sub:#9aa0ad;--accent:#f97316;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--radius:14px}
+  :root{
+    --bg:#0d0f14; --card:#191c24; --card2:#212531; --line:#2d3340;
+    --text:#f0f1f5; --sub:#9aa0ad; --accent:#f97316; --good:#22c55e;
+    --warn:#f59e0b; --bad:#ef4444; --radius:14px;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:40px}
   .container{max-width:600px;margin:0 auto;padding:16px}
@@ -17,17 +21,21 @@
   .frase-sub{font-size:13px;color:var(--sub);margin-top:4px}
   .ok{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .info{color:var(--accent)}
   .status-banner{padding:14px;border-radius:10px;font-weight:700;font-size:15px;text-align:center;margin-bottom:14px}
-  .status-ok{background:#123322;color:var(--good)} .status-warning{background:#3a2410;color:var(--warn)} .status-alert{background:#3a1010;color:var(--bad)}
+  .status-ok{background:#123322;color:var(--good)}
+  .status-warning{background:#3a2410;color:var(--warn)}
+  .status-alert{background:#3a1010;color:var(--bad)}
   .refresh-btn{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;font-family:inherit}
   .auto-refresh-box{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:var(--sub);flex-wrap:wrap}
   .auto-refresh-box select{padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:12px}
   .last-update{font-size:11px;color:var(--sub);width:100%}
   .empty-state{text-align:center;padding:20px;color:var(--sub);font-size:14px}
+  .list-item{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .list-item:last-child{border-bottom:none}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>📊 Tablero de Control</h1>
+  <h1>📊 Panel Panorámico</h1>
   <div class="subtitle" id="last-update">🕐 Actualizado: —</div>
   <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar</button>
   <div class="auto-refresh-box">
@@ -37,54 +45,116 @@
       <option value="300" selected>5 minutos</option><option value="600">10 minutos</option>
     </select>
   </div>
+
   <div id="estado-general"></div>
-  <div class="card"><div class="card-title">1️⃣ Ahora</div><div id="ahora-content"></div></div>
-  <div class="card"><div class="card-title">2️⃣ Ayer</div><div id="ayer-content"></div></div>
-  <div class="card"><div class="card-title">3️⃣ Decisiones pendientes</div><div id="pendientes-content"></div></div>
-  <div class="card"><div class="card-title">4️⃣ Cómo va la semana</div><div id="semana-content"></div></div>
-  <div class="card"><div class="card-title">5️⃣ Confiabilidad</div><div id="confiabilidad-content"></div></div>
-  <div class="card"><div class="card-title">6️⃣ Meta</div><div id="meta-content"></div></div>
+
+  <div class="card"><div class="card-title">1️⃣ Ahora — contexto operativo</div><div id="ahora-content"></div></div>
+  <div class="card"><div class="card-title">2️⃣ Ayer — contexto de cierre</div><div id="ayer-content"></div></div>
+  <div class="card"><div class="card-title">3️⃣ Meta — ¿vamos a cumplir?</div><div id="meta-content"></div></div>
+  <div class="card"><div class="card-title">4️⃣ Ritmo semanal</div><div id="semana-content"></div></div>
+  <div class="card"><div class="card-title">5️⃣ Flota — salud de placas</div><div id="flota-content"></div></div>
+  <div class="card"><div class="card-title">6️⃣ Puntos críticos</div><div id="criticos-content"></div></div>
+  <div class="card"><div class="card-title">7️⃣ Trazabilidad</div><div id="trazabilidad-content"></div></div>
 </div>
 
 <script>
-const BASE_URL = "https://script.google.com/macros/s/TU_URL_DEL_WEB_APP/exec";
+const BASE_URL = "https://script.google.com/macros/s/AKfycbx1GgVv6OdpiHM3NsukmV88jftmmzSpafU3uabgA3QwYeq-FJjKb1dUe3gJsTwi76SA6Q/exec";
 let autoRefreshInterval = null;
-function cambiarAutoRefresh(){ const s=parseInt(document.getElementById('auto-refresh-select').value); if(autoRefreshInterval)clearInterval(autoRefreshInterval); if(s>0)autoRefreshInterval=setInterval(cargarDatos,s*1000); }
+
+function cambiarAutoRefresh(){
+  const s = parseInt(document.getElementById('auto-refresh-select').value);
+  if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+  if(s > 0) autoRefreshInterval = setInterval(cargarDatos, s * 1000);
+}
+
 async function cargarDatos(){
   try{
-    const resp=await fetch(BASE_URL+'?action=dashboard');
-    const d=await resp.json();
-    if(d.ok){ procesarDatos(d); document.getElementById('last-update').textContent='🕐 Actualizado: '+(d.ACTUALIZADO||'—'); }
-    else document.getElementById('estado-general').innerHTML='<div class="status-banner status-alert">🔴 '+(d.error||'Sin datos')+'</div>';
-  }catch(e){ document.getElementById('estado-general').innerHTML='<div class="status-banner status-alert">🔴 Error de conexión</div>'; }
+    const resp = await fetch(BASE_URL + '?action=dashboard');
+    const d = await resp.json();
+    if(d.ok){
+      procesarDatos(d);
+      document.getElementById('last-update').textContent = '🕐 Actualizado: ' + (d.ACTUALIZADO || '—');
+    } else {
+      document.getElementById('estado-general').innerHTML = '<div class="status-banner status-alert">🔴 ' + (d.error || 'Sin datos') + '</div>';
+    }
+  }catch(e){
+    document.getElementById('estado-general').innerHTML = '<div class="status-banner status-alert">🔴 Error de conexión</div>';
+  }
 }
+
 function procesarDatos(d){
-  const alcanzaMes=d.MES_ALCANZA==='SI', alcanzaAnio=d.ANIO_ALCANZA==='SI';
-  const pendientes=(d.pendientes||[]).length>0;
-  const manuales=Number(d.ORIGEN_MANUAL_COUNT)||0;
-  
-  if(!alcanzaMes||!alcanzaAnio) document.getElementById('estado-general').innerHTML='<div class="status-banner status-alert">🔴 Atención inmediata</div>';
-  else if(pendientes) document.getElementById('estado-general').innerHTML='<div class="status-banner status-warning">🟡 Hay decisiones pendientes</div>';
-  else document.getElementById('estado-general').innerHTML='<div class="status-banner status-ok">✅ Todo en orden</div>';
-  
-  document.getElementById('ahora-content').innerHTML='<div class="frase">'+(d.AHORA_RESUMEN||'—')+'</div><div class="frase-sub">Último hito: '+(d.AHORA_ULTIMO_HITO||'—')+'</div>';
-  document.getElementById('ayer-content').innerHTML='<div class="frase">'+(d.AYER_RESUMEN||'Sin turnos ayer')+'</div>';
-  
-  const pend=(d.pendientes||[]);
-  document.getElementById('pendientes-content').innerHTML = pend.length===0
-    ? '<div class="frase ok">✅ Sin decisiones pendientes</div>'
-    : pend.map(p=>'<div class="frase" style="margin-bottom:6px;"><span class="warn">⚠️</span> '+p.placa+' — '+p.leyenda+' <span class="frase-sub">('+p.origen+')</span></div>').join('');
-  
-  const sem=d.SEMANA_TEXTO||'—';
-  document.getElementById('semana-content').innerHTML='<div class="frase '+(sem.indexOf('+')!==-1?'ok':'bad')+'">'+sem+'</div>';
-  
-  document.getElementById('confiabilidad-content').innerHTML='<div class="frase">'+(d.CONFIABILIDAD_PCT||'—')+'</div><div class="frase-sub">turnos documentados y aprobados'+(manuales>0?' · '+manuales+' manual(es)':'')+'</div>';
-  
-  document.getElementById('meta-content').innerHTML=
-    '<div class="frase">Mes: faltan <span class="'+(alcanzaMes?'ok':'bad')+'">'+(d.MES_FALTA_ML||0)+' ML</span> = '+(d.MES_TURNOS_EQUIV||0)+' turnos → '+(alcanzaMes?'✅ Sí alcanza':'❌ No alcanza')+'</div>'+
-    '<div class="frase" style="margin-top:8px;">Año: faltan <span class="'+(alcanzaAnio?'ok':'bad')+'">'+(d.ANIO_FALTA_ML||0)+' ML</span> = '+(d.ANIO_TURNOS_EQUIV||0)+' turnos → '+(alcanzaAnio?'✅ Sí alcanza':'❌ No alcanza')+'</div>';
+  // Semáforo general
+  const alcanzaMes = d.MES_ALCANZA === 'SI';
+  const alcanzaAnio = d.ANIO_ALCANZA === 'SI';
+  const pendientes = (d.pendientes || []).length;
+  const flotaProblemas = (d.flota_problemas || []).length;
+  const criticos = (d.tramos_criticos || []).length;
+  const manuales = Number(d.ORIGEN_MANUAL_COUNT) || 0;
+
+  let estadoHTML = '';
+  if(!alcanzaMes || !alcanzaAnio || flotaProblemas > 0 || criticos > 0){
+    estadoHTML = '<div class="status-banner status-alert">🔴 Atención: requiere intervención</div>';
+  } else if(pendientes > 0 || manuales > 0){
+    estadoHTML = '<div class="status-banner status-warning">🟡 Hay pendientes o datos manuales</div>';
+  } else {
+    estadoHTML = '<div class="status-banner status-ok">✅ Operación estable y en meta</div>';
+  }
+  document.getElementById('estado-general').innerHTML = estadoHTML;
+
+  // 1. Ahora
+  document.getElementById('ahora-content').innerHTML =
+    '<div class="frase">' + (d.AHORA_RESUMEN || 'Sin turno activo') + '</div>' +
+    '<div class="frase-sub">Último hito: ' + (d.AHORA_ULTIMO_HITO || '—') + '</div>';
+
+  // 2. Ayer
+  document.getElementById('ayer-content').innerHTML =
+    '<div class="frase">' + (d.AYER_RESUMEN || 'Sin turnos cerrados ayer') + '</div>';
+
+  // 3. Meta
+  document.getElementById('meta-content').innerHTML =
+    '<div class="frase">Mes: faltan <span class="' + (alcanzaMes?'ok':'bad') + '">' + (d.MES_FALTA_ML||0) + ' ML</span> = ' + (d.MES_TURNOS_EQUIV||0) + ' turnos → ' + (alcanzaMes?'✅ Alcanza':'❌ No alcanza') + '</div>' +
+    '<div class="frase" style="margin-top:8px;">Año: faltan <span class="' + (alcanzaAnio?'ok':'bad') + '">' + (d.ANIO_FALTA_ML||0) + ' ML</span> = ' + (d.ANIO_TURNOS_EQUIV||0) + ' turnos → ' + (alcanzaAnio?'✅ Alcanza':'❌ No alcanza') + '</div>';
+
+  // 4. Semana
+  const sem = d.SEMANA_TEXTO || '—';
+  document.getElementById('semana-content').innerHTML =
+    '<div class="frase ' + (sem.indexOf('+') !== -1 ? 'ok' : 'bad') + '">' + sem + '</div>';
+
+  // 5. Flota
+  const flota = d.flota_problemas || [];
+  if(flota.length === 0){
+    document.getElementById('flota-content').innerHTML = '<div class="empty-state">✅ Flota saludable</div>';
+  } else {
+    let html = '';
+    flota.forEach(f => {
+      html += '<div class="list-item">🔧 <b>' + f.placa + '</b>: ' + f.pct_falla + '% falla (' + f.averias + ' averías en ' + f.turnos + ' turnos)</div>';
+    });
+    document.getElementById('flota-content').innerHTML = html;
+  }
+
+  // 6. Puntos críticos
+  const criticos = d.tramos_criticos || [];
+  if(criticos.length === 0){
+    document.getElementById('criticos-content').innerHTML = '<div class="empty-state">✅ Sin puntos críticos</div>';
+  } else {
+    let html = '';
+    criticos.forEach(c => {
+      html += '<div class="list-item">📍 <b>' + c.tramo + '</b>: ' + c.cctv_no + ' CCTV=NO + ' + c.desobs + ' desobstrucciones (puntuación ' + c.puntuacion + ')</div>';
+    });
+    document.getElementById('criticos-content').innerHTML = html;
+  }
+
+  // 7. Trazabilidad
+  document.getElementById('trazabilidad-content').innerHTML =
+    '<div class="frase">Confiabilidad: ' + (d.CONFIABILIDAD_PCT || '—') + '</div>' +
+    '<div class="frase-sub">' + (manuales > 0 ? '⚠️ ' + manuales + ' turno(s) manual(es)' : '✅ Sin datos manuales') + '</div>' +
+    '<div class="frase-sub">Decisiones pendientes: ' + pendientes + '</div>';
 }
-window.addEventListener('load',()=>{cargarDatos();cambiarAutoRefresh();});
+
+window.addEventListener('load', () => {
+  cargarDatos();
+  cambiarAutoRefresh();
+});
 </script>
 </body>
 </html>
