@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel de Control — Bitácora Preventiva</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#191c24; --card2:#212531; --line:#2d3340;
+    --text:#f0f1f5; --sub:#9aa0ad; --accent:#f97316; --good:#22c55e;
+    --warn:#f59e0b; --bad:#ef4444; --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding-bottom:40px;}
+  .container{max-width:600px; margin:0 auto; padding:16px;}
+  
+  h1{font-size:20px; margin:0 0 4px;}
+  .subtitle{font-size:13px; color:var(--sub); margin-bottom:16px; display:flex; align-items:center; gap:8px;}
+  
+  .card{background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:14px; border:1px solid var(--line);}
+  .card-title{font-size:14px; font-weight:600; margin-bottom:12px; color:var(--text); display:flex; align-items:center; gap:8px;}
+  
+  /* Métricas */
+  .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .metric{background:var(--card2); border-radius:10px; padding:16px; text-align:center;}
+  .metric-value{font-size:28px; font-weight:700; color:var(--accent);}
+  .metric-label{font-size:11px; color:var(--sub); margin-top:4px; text-transform:uppercase; letter-spacing:.05em;}
+  
+  /* Períodos */
+  .period-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:6px;}
+  .period-item{background:var(--card2); border-radius:10px; padding:12px 6px; text-align:center; border:1px solid var(--line);}
+  .period-item.highlight{background:var(--accent); border-color:var(--accent);}
+  .period-item.highlight .period-value{color:#fff;}
+  .period-item.highlight .period-label{color:rgba(255,255,255,.8);}
+  .period-value{font-size:18px; font-weight:700; color:var(--text);}
+  .period-label{font-size:9px; color:var(--sub); text-transform:uppercase;}
+  
+  /* Progreso */
+  .progress-bar{height:10px; background:var(--card2); border-radius:5px; overflow:hidden; margin-top:12px;}
+  .progress-fill{height:100%; background:var(--accent); border-radius:5px; transition:width .5s ease;}
+  .progress-pct{text-align:center; font-size:12px; color:var(--sub); margin-top:8px; font-weight:600;}
+  
+  /* Estado */
+  .status-dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; animation:pulse 2s infinite;}
+  .status-green{background:var(--good);}
+  .status-yellow{background:var(--warn);}
+  .status-red{background:var(--bad);}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.4;}}
+  
+  /* Cola de aprobación */
+  .approval-item{background:var(--card2); border-radius:10px; padding:14px; margin-bottom:10px; border:1px solid var(--line);}
+  .a-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .a-code{font-weight:700; font-size:15px; color:var(--text);}
+  .a-ml{font-size:20px; font-weight:700; color:var(--accent);}
+  .a-detail{font-size:12px; color:var(--sub);}
+  .approval-actions{display:flex; gap:8px; margin-top:12px;}
+  .btn-approve{flex:1; padding:12px; border-radius:8px; background:var(--good); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
+  .btn-reject{flex:1; padding:12px; border-radius:8px; background:var(--bad); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
+  .comentario-input{width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:14px; margin-top:10px; display:none;}
+  .btn-confirmar-rechazo{display:none; margin-top:8px; width:100%; padding:10px; border-radius:8px; background:var(--bad); color:#fff; border:none; font-weight:600; cursor:pointer; font-size:13px;}
+  
+  /* Botón refrescar */
+  .refresh-btn{width:100%; padding:14px; border-radius:10px; background:var(--accent); color:#fff; border:none; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:16px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:8px;}
+  .refresh-btn:active{opacity:.7;}
+  
+  /* Selector de auto-recarga */
+  .auto-refresh-box{display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:12px; color:var(--sub);}
+  .auto-refresh-box select{padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--card2); color:var(--text); font-size:12px; font-family:inherit;}
+  
+  /* Estado vacío */
+  .empty-state{text-align:center; padding:30px 20px; color:var(--sub); font-size:14px;}
+  
+  /* Toast */
+  .toast{position:fixed; bottom:16px; left:16px; right:16px; max-width:568px; margin:0 auto; background:var(--card2); border:1px solid var(--accent); padding:12px 14px; border-radius:10px; font-size:13px; display:none; z-index:60; color:var(--text);}
+  .toast.show{display:block;}
+  
+  /* Última actualización */
+  .last-update{font-size:11px; color:var(--sub); text-align:center; margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📊 Panel de Control</h1>
+  <div class="subtitle">
+    <span class="status-dot status-green" id="status-indicator"></span>
+    <span id="status-text">Conectado</span>
+  </div>
+  
+  <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar ahora</button>
+  
+  <!-- AUTO-RECARGA -->
+  <div class="auto-refresh-box">
+    <span>Auto-recarga:</span>
+    <select id="auto-refresh-select" onchange="cambiarAutoRefresh()">
+      <option value="0">Desactivada</option>
+      <option value="60">Cada 1 minuto</option>
+      <option value="300" selected>Cada 5 minutos</option>
+      <option value="600">Cada 10 minutos</option>
+      <option value="1800">Cada 30 minutos</option>
+      <option value="3600">Cada 1 hora</option>
+    </select>
+    <span class="last-update" id="last-update"></span>
+  </div>
+  
+  <!-- PERÍODOS -->
+  <div class="card">
+    <div class="card-title">📅 Períodos</div>
+    <div class="period-grid">
+      <div class="period-item highlight">
+        <div class="period-value" id="val-ahora-ml">—</div>
+        <div class="period-label">Ahora</div>
+      </div>
+      <div class="period-item">
+        <div class="period-value" id="val-ayer-ml">—</div>
+        <div class="period-label">Ayer</div>
+      </div>
+      <div class="period-item">
+        <div class="period-value" id="val-semana-ml">—</div>
+        <div class="period-label">Semana</div>
+      </div>
+      <div class="period-item">
+        <div class="period-value" id="val-mes-ml">—</div>
+        <div class="period-label">Mes</div>
+      </div>
+      <div class="period-item">
+        <div class="period-value" id="val-anio-ml">—</div>
+        <div class="period-label">Año</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- META MENSUAL -->
+  <div class="card">
+    <div class="card-title">🎯 Meta Mensual</div>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="metric-value" id="meta-ml">—</div>
+        <div class="metric-label">Meta ML</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="meta-acumulado">—</div>
+        <div class="metric-label">Acumulado</div>
+      </div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="meta-progress" style="width:0%;"></div>
+    </div>
+    <div class="progress-pct" id="meta-pct">0% cumplido</div>
+  </div>
+  
+  <!-- M3 CONSUMO -->
+  <div class="card">
+    <div class="card-title">💧 Consumo de Agua</div>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="metric-value" id="m3-mes">—</div>
+        <div class="metric-label">Este mes</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="m3-anio">—</div>
+        <div class="metric-label">Este año</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- COLA DE APROBACIÓN -->
+  <div class="card">
+    <div class="card-title">🔍 Turnos pendientes de revisión</div>
+    <div id="aprobacion-lista">
+      <div class="empty-state">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== CONFIGURACIÓN ==================== */
+// ✅ URL YA INTEGRADA — NO NECESITAS CAMBIAR NADA
+const DASHBOARD_URL = "https://script.google.com/macros/s/AKfycbzQizcyWqBMf-q71BmrErM4Co733Vz3t4ORhl0BuCHt3kaLR87h-eWJMcwuXY4m0tNHqQ/exec";
+
+let datosDashboard = null;
+let autoRefreshInterval = null;
+
+/* ==================== UTILIDADES ==================== */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function actualizarEstado(status, text){
+  const dot = document.getElementById('status-indicator');
+  const txt = document.getElementById('status-text');
+  
+  dot.className = 'status-dot ' + status;
+  txt.textContent = text;
+}
+
+function actualizarUltimaCarga(){
+  const ahora = new Date();
+  const hora = ahora.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('last-update').textContent = 'Actualizado: ' + hora;
+}
+
+/* ==================== AUTO-RECARGA ==================== */
+function cambiarAutoRefresh(){
+  const select = document.getElementById('auto-refresh-select');
+  const segundos = parseInt(select.value);
+  
+  // Limpiar intervalo anterior
+  if(autoRefreshInterval){
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+  
+  // Crear nuevo intervalo si no está desactivado
+  if(segundos > 0){
+    autoRefreshInterval = setInterval(cargarDatos, segundos * 1000);
+    toast('🔄 Auto-recarga: cada ' + Math.round(segundos/60) + ' min');
+  } else {
+    toast('🔄 Auto-recarga desactivada');
+  }
+}
+
+/* ==================== CARGAR DATOS ==================== */
+async function cargarDatos(){
+  actualizarEstado('status-yellow', 'Cargando...');
+  
+  try{
+    const resp = await fetch(DASHBOARD_URL);
+    const texto = await resp.text();
+    
+    try{
+      const data = JSON.parse(texto);
+      if(data.ok && data.data){
+        procesarDatos(data.data);
+        actualizarEstado('status-green', 'Conectado');
+        actualizarUltimaCarga();
+      } else {
+        actualizarEstado('status-red', 'Sin datos');
+        mostrarError(data.error || 'No se pudieron cargar los datos. Ejecuta "generarTodo" en Apps Script.');
+      }
+    }catch(e){
+      actualizarEstado('status-red', 'Error');
+      mostrarError('Respuesta no válida del servidor');
+    }
+  }catch(e){
+    actualizarEstado('status-red', 'Sin conexión');
+    mostrarError('Error de conexión: ' + e.message);
+  }
+}
+
+function mostrarError(msg){
+  document.getElementById('aprobacion-lista').innerHTML = `
+    <div class="empty-state">
+      <div style="font-size:32px; margin-bottom:8px;">⚠️</div>
+      ${msg}
+    </div>`;
+}
+
+/* ==================== PROCESAR DATOS ==================== */
+function procesarDatos(data){
+  datosDashboard = data;
+  
+  if(data.length < 6){
+    mostrarError('Datos incompletos en Dashboard Sheet');
+    return;
+  }
+  
+  // Períodos
+  document.getElementById('val-ahora-ml').textContent = formatML(data[1][1]);
+  document.getElementById('val-ayer-ml').textContent = formatML(data[2][1]);
+  document.getElementById('val-semana-ml').textContent = formatML(data[3][1]);
+  document.getElementById('val-mes-ml').textContent = formatML(data[4][1]);
+  document.getElementById('val-anio-ml').textContent = formatML(data[5][1]);
+  
+  // Meta mensual
+  const metaML = data[7] ? Number(data[7][1]) : 0;
+  const acumuladoML = data[8] ? Number(data[8][1]) : 0;
+  const pctStr = data[9] ? String(data[9][1]).replace('%','') : '0';
+  const pct = parseFloat(pctStr) || 0;
+  
+  document.getElementById('meta-ml').textContent = formatML(metaML);
+  document.getElementById('meta-acumulado').textContent = formatML(acumuladoML);
+  document.getElementById('meta-pct').textContent = pct + '% cumplido';
+  
+  const pctWidth = Math.min(pct, 100);
+  document.getElementById('meta-progress').style.width = pctWidth + '%';
+  
+  if(pct >= 100){
+    document.getElementById('meta-progress').style.background = 'var(--good)';
+  } else if(pct >= 70){
+    document.getElementById('meta-progress').style.background = 'var(--accent)';
+  } else if(pct >= 40){
+    document.getElementById('meta-progress').style.background = 'var(--warn)';
+  } else {
+    document.getElementById('meta-progress').style.background = 'var(--bad)';
+  }
+  
+  // M3
+  document.getElementById('m3-mes').textContent = formatM3(data[4][2]);
+  document.getElementById('m3-anio').textContent = formatM3(data[5][2]);
+  
+  // Cola de aprobación
+  renderColaAprobacion(data);
+}
+
+function formatML(val){
+  const num = Number(val);
+  if(isNaN(num)) return '—';
+  return Math.round(num);
+}
+
+function formatM3(val){
+  const num = Number(val);
+  if(isNaN(num)) return '—';
+  return Math.round(num * 10) / 10;
+}
+
+/* ==================== COLA DE APROBACIÓN ==================== */
+function renderColaAprobacion(data){
+  const lista = document.getElementById('aprobacion-lista');
+  
+  const pendientes = [];
+  for(let r = 12; r < data.length; r++){
+    if(data[r][1] && String(data[r][1]).trim() !== ''){
+      pendientes.push({
+        codigo: String(data[r][1]).trim(),
+        ml: Number(data[r][2]) || 0
+      });
+    }
+  }
+  
+  if(pendientes.length === 0){
+    lista.innerHTML = `
+      <div class="empty-state">
+        <div style="font-size:32px; margin-bottom:8px;">✅</div>
+        No hay turnos pendientes de revisión
+      </div>`;
+    return;
+  }
+  
+  let html = '';
+  pendientes.forEach((p, index)=>{
+    html += `
+      <div class="approval-item">
+        <div class="a-header">
+          <span class="a-code">${p.codigo}</span>
+          <span class="a-ml">${Math.round(p.ml)} ML</span>
+        </div>
+        <div class="a-detail">
+          <span class="status-dot status-yellow"></span>
+          Pendiente de visto bueno
+        </div>
+        <div class="approval-actions">
+          <button class="btn-approve" onclick="aprobarTurno('${p.codigo}', ${index})">✅ Aprobar</button>
+          <button class="btn-reject" onclick="mostrarComentario(${index})">❌ Rechazar</button>
+        </div>
+        <input type="text" class="comentario-input" id="comentario-${index}" placeholder="Motivo del rechazo (obligatorio)">
+        <button class="btn-confirmar-rechazo" id="btn-rechazar-${index}" onclick="rechazarTurno('${p.codigo}', ${index})">Confirmar rechazo</button>
+      </div>`;
+  });
+  
+  lista.innerHTML = html;
+}
+
+function mostrarComentario(index){
+  const input = document.getElementById('comentario-' + index);
+  const btn = document.getElementById('btn-rechazar-' + index);
+  input.style.display = 'block';
+  btn.style.display = 'block';
+  input.focus();
+}
+
+async function aprobarTurno(codigo, index){
+  await enviarAprobacion(codigo, 'SI', '');
+  toast('✅ Turno ' + codigo + ' aprobado');
+  setTimeout(cargarDatos, 1000);
+}
+
+async function rechazarTurno(codigo, index){
+  const comentario = document.getElementById('comentario-' + index).value.trim();
+  if(!comentario){
+    toast('❌ Escribe el motivo del rechazo');
+    return;
+  }
+  
+  await enviarAprobacion(codigo, 'NO', comentario);
+  toast('❌ Turno ' + codigo + ' rechazado');
+  setTimeout(cargarDatos, 1000);
+}
+
+async function enviarAprobacion(codigo, aprobado, comentario){
+  const payload = {
+    accion: 'aprobarTurno',
+    codigo: codigo,
+    aprobado: aprobado,
+    comentario: comentario
+  };
+  
+  try{
+    await fetch(DASHBOARD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    });
+  }catch(e){
+    console.error('Error enviando aprobación:', e);
+  }
+}
+
+/* ==================== INICIO ==================== */
+window.addEventListener('load', ()=>{
+  cargarDatos();
+  cambiarAutoRefresh(); // Inicia con 5 minutos por defecto
+});
+</script>
+</body>
+</html>
