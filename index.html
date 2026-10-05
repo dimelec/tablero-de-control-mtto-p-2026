@@ -1,173 +1,191 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#2563eb">
-<title>Preventivo · Oficina · Corte</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablero Operativo V3 · Prototipo</title>
 <style>
-:root{--blue:#2563eb;--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e7ec;--ok:#087443;--warn:#b54708;--bad:#b42318}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-.wrap{max-width:1250px;margin:auto;padding:14px}.head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px}.switch{display:flex;background:#e8eef9;padding:4px;border-radius:12px;gap:4px}
-.switch button{border:0;background:transparent;padding:9px 13px;border-radius:9px;font-weight:800;color:#475467}.switch button.on{background:#fff;color:var(--blue);box-shadow:0 1px 3px #10182822}
-.status{margin:12px 0;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#344054}.status.err{background:#fef3f2;color:var(--bad)}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px #1018280d}
-.k{color:var(--muted);font-size:12px;font-weight:700}.v{font-size:24px;font-weight:900;margin-top:3px}.hint{font-size:11px;color:var(--muted)}
-.section{margin-top:12px}.section h2{font-size:16px;margin:0 0 10px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f5}.row:last-child{border-bottom:0}.num{font-variant-numeric:tabular-nums;font-weight:800}
-.pill{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800}.ok{background:#ecfdf3;color:var(--ok)}.warn{background:#fffaeb;color:var(--warn)}.neutral{background:#f2f4f7;color:#475467}
-.contractor{border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}.contractor>button{width:100%;border:0;background:#fff;padding:13px;display:flex;justify-content:space-between;align-items:center;text-align:left;font-weight:900;color:var(--text)}
-.contractor .body{display:none;padding:0 12px 12px;background:#fff}.contractor.open .body{display:block}.task{padding:11px 0;border-top:1px solid #f0f2f5}.taskhead{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.taskname{font-weight:800}.mini{font-size:12px;color:var(--muted);margin-top:4px}.details{display:none;margin-top:9px;padding:10px;background:#f8fafc;border-radius:10px}.task.open .details{display:block}
-table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:9px;border-bottom:1px solid #f0f2f5;text-align:left;white-space:nowrap}th{font-size:11px;color:#475467;background:#f9fafb}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px}
-button{cursor:pointer}.linkbtn{border:0;background:#eef4ff;color:var(--blue);font-weight:800;padding:7px 9px;border-radius:8px}.empty{padding:20px;text-align:center;color:var(--muted)}
-@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.summary{grid-template-columns:1fr}.wrap{padding:10px}.v{font-size:21px}}
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#687386;--line:#dfe5ee;--blue:#2563eb;--soft:#eef4ff;--warn:#fff7e8;--bad:#fff0f0;--good:#edf9f0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+.app{max-width:1180px;margin:auto;min-height:100vh}.head{background:#101827;color:white;padding:18px 18px 12px;position:sticky;top:0;z-index:5}
+.head h1{font-size:19px;margin:0 0 3px}.head small{opacity:.72}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.tab{border:0;border-radius:9px;padding:11px 6px;font-weight:700;background:#263247;color:#dbe5f5}.tab.on{background:white;color:#172033}
+main{padding:14px}.view{display:none}.view.on{display:block}.bar{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.segment{display:flex;background:#e8edf5;border-radius:9px;padding:3px}.segment button{border:0;background:transparent;padding:8px 10px;border-radius:7px;font-weight:700}.segment .on{background:white}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;box-shadow:0 1px 2px #00000008}
+.k{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}.v{font-size:24px;font-weight:800;margin-top:5px}.sub{font-size:12px;color:var(--muted);margin-top:4px}
+h2{font-size:17px;margin:20px 0 9px}h3{font-size:15px;margin:0 0 8px}.attention{display:grid;gap:8px}.case{background:white;border:1px solid var(--line);border-left:5px solid #d59b27;border-radius:10px;padding:12px;cursor:pointer}
+.case strong{display:block}.case span{font-size:12px;color:var(--muted)}.case.bad{border-left-color:#c84b4b}.case.info{border-left-color:var(--blue)}
+.search{width:100%;padding:13px 14px;border:1px solid #cfd7e4;border-radius:11px;font-size:16px;background:white}.chips{display:flex;gap:6px;overflow:auto;margin:9px 0}.chip{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:999px;padding:7px 10px;font-size:12px}
+.hero{background:var(--soft);border:1px solid #cddcff;border-radius:12px;padding:14px}.hero .title{font-size:20px;font-weight:800}.meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:5px}
+.timeline{border-left:2px solid #cfd7e4;margin-left:8px;padding-left:17px}.event{position:relative;margin:13px 0}.event:before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#64748b;left:-22px;top:4px}.time{font-size:12px;font-weight:700}.event small{display:block;color:var(--muted);margin-top:2px}
+.sources{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.source{text-align:center}.source .v{font-size:20px}.motor{background:var(--warn);border:1px solid #f1d28c;border-radius:11px;padding:13px;margin-top:10px}
+.progress{height:12px;background:#e7ebf2;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;width:68.4%;background:#4b74c8}
+.listrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0;font-size:13px}.listrow:first-child{border-top:0}
+.cctvbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mini{background:white;border:1px solid var(--line);border-radius:10px;padding:10px}.mini b{font-size:19px;display:block}
+.note{font-size:12px;color:var(--muted);margin-top:10px}.tag{display:inline-block;padding:4px 7px;border-radius:999px;background:#edf2f7;font-size:11px;font-weight:700}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}.sources,.cctvbox{grid-template-columns:1fr}.head{position:static}.bar{align-items:flex-start;flex-direction:column}.v{font-size:21px}}
+
+.empty,.error{background:white;border:1px dashed var(--line);border-radius:11px;padding:16px;text-align:center;color:var(--muted);margin-top:10px}
+.error{border-color:#e8b6b6;background:#fff8f8;color:#8b3434}
+.btn{border:0;background:var(--blue);color:white;border-radius:9px;padding:9px 12px;font-weight:700;cursor:pointer}
+.linkbtn{border:0;background:transparent;color:var(--blue);font-weight:700;padding:0;cursor:pointer}
+@media(max-width:720px){.case{min-height:58px}.search{font-size:16px}.tabs{position:sticky;top:0}}
+
+.historynav{display:flex;gap:7px;overflow:auto;margin:10px 0 14px;padding-bottom:2px}
+.hnav{border:1px solid var(--line);background:white;border-radius:9px;padding:9px 11px;white-space:nowrap;font-weight:700;color:var(--text)}
+.hnav.on{background:var(--blue);color:white;border-color:var(--blue)}
+.histpanel{display:none}.histpanel.on{display:block}
+.journey{background:white;border:1px solid var(--line);border-radius:11px;padding:12px;margin:8px 0;cursor:pointer}
+.journey .top{display:flex;justify-content:space-between;gap:10px}.journey small{color:var(--muted)}
+.breadcrumb{font-size:12px;color:var(--muted);margin:8px 0 12px}.breadcrumb b{color:var(--text)}
+.state{display:inline-block;border-radius:999px;padding:4px 7px;font-size:10px;font-weight:800;background:var(--good)}
+.state.warn{background:var(--warn)}.state.bad{background:var(--bad)}
+
+.story{position:relative;margin:8px 0 4px 8px;padding-left:20px;border-left:3px solid #d7deea}
+.storyitem{position:relative;background:white;border:1px solid var(--line);border-radius:11px;padding:12px;margin:0 0 10px}
+.storyitem:before{content:"";position:absolute;left:-27px;top:16px;width:11px;height:11px;border-radius:50%;background:#64748b;border:2px solid var(--bg)}
+.storyitem.attn:before{background:#d59b27}.storyitem.done:before{background:#4e9562}.storyitem.bad:before{background:#c84b4b}
+.storyhead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.storyhead small{color:var(--muted)}
+.sourcepill{font-size:10px;font-weight:800;border-radius:999px;background:#edf2f7;padding:4px 7px;white-space:nowrap}
+.effect{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.effect b{color:var(--text)}
+.storyfilter{display:flex;gap:6px;overflow:auto;margin:8px 0}.storyfilter button{border:1px solid var(--line);background:white;border-radius:999px;padding:7px 9px;white-space:nowrap}.storyfilter button.on{background:#263247;color:white}
+
+.cutdecision{border-radius:12px;padding:14px;background:#fff7e8;border:1px solid #f1d28c;margin-top:10px}
+.cutdecision .decision{font-size:25px;font-weight:900;margin:3px 0}
+.carry{display:grid;gap:8px}.carryitem{background:white;border:1px solid var(--line);border-radius:10px;padding:11px}
+.carryitem .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.origin{font-size:10px;font-weight:800;background:#edf2f7;border-radius:999px;padding:4px 7px}
+.cutnav{display:flex;gap:6px;overflow:auto;margin:10px 0}.cutnav button{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:9px;padding:8px 10px;font-weight:700}.cutnav button.on{background:#263247;color:white}
+.cutpanel{display:none}.cutpanel.on{display:block}
 </style>
 </head>
-<body>
-<div class="wrap">
-  <div class="head">
-    <div><h1>Mantenimiento Preventivo · Oficina</h1><div class="sub" id="periodoTxt">Corte móvil</div></div>
-    <div class="switch">
-      <button id="b7" class="on">7 DÍAS</button>
-      <button id="bm">MES ACTUAL</button>
-    </div>
-  </div>
-
-  <div id="status" class="status">Consultando Motor…</div>
-
-  <div class="cards">
-    <div class="card"><div class="k">ML TRAZABLES</div><div class="v" id="mlTra">—</div><div class="hint">evidencia operativa</div></div>
-    <div class="card"><div class="k">ML DECLARADOS</div><div class="v" id="mlDec">—</div><div class="hint">cierre declarado</div></div>
-    <div class="card"><div class="k">ML POR ACLARAR</div><div class="v" id="mlAcl">—</div><div class="hint">diferencia de referencia</div></div>
-    <div class="card"><div class="k">JORNADAS</div><div class="v" id="jor">—</div><div class="hint" id="jorHint">del corte</div></div>
-  </div>
-
-  <div class="section summary">
-    <div class="card">
-      <h2>Lectura del período</h2>
-      <div class="row"><span>Placas activas</span><span class="num" id="placas">—</span></div>
-      <div class="row"><span>Contratistas</span><span class="num" id="contratistas">—</span></div>
-      <div class="row"><span>Frentes / barrios</span><span class="num" id="frentes">—</span></div>
-      <div class="row"><span>Agua trazable</span><span class="num" id="m3">—</span></div>
-    </div>
-    <div class="card">
-      <h2>CCTV e Inspector</h2>
-      <div class="row"><span>Cobertura CCTV</span><span class="num" id="cctvPct">—</span></div>
-      <div class="row"><span>ML presentados CCTV</span><span class="num" id="cctvPre">—</span></div>
-      <div class="row"><span>ML inspeccionados únicos</span><span class="num" id="cctvIns">—</span></div>
-      <div class="row"><span>ML verificados Inspector</span><span class="num" id="mlInspector">—</span></div>
-    </div>
-  </div>
-
-  <div class="section card">
-    <h2>Contratistas → tareas / frentes</h2>
-    <div class="sub">Abre un contratista y luego un frente para ver sus jornadas. Esta vista no modifica datos.</div>
-    <div id="tree"></div>
-  </div>
-
-  <div class="section card">
-    <h2>Jornadas que requieren atención</h2>
-    <div class="sub">Se muestran primero las jornadas cuya diferencia declarada vs. trazable no es cero.</div>
-    <div class="tablewrap" style="margin-top:9px">
-      <table>
-        <thead><tr><th>Fecha</th><th>Placa</th><th>Contratista</th><th>Barrio</th><th>ML trazables</th><th>ML declarados</th><th>Diferencia</th><th>Lectura</th></tr></thead>
-        <tbody id="attention"></tbody>
-      </table>
-    </div>
-  </div>
+<body><div class="app">
+<header class="head"><h1>Tablero Operativo · V3</h1><small>Datos reales del Motor · solo lectura</small>
+<nav class="tabs"><button class="tab on" data-v="operacion">OPERACIÓN</button><button class="tab" data-v="explorar">EXPLORAR</button><button class="tab" data-v="corte">CORTE</button></nav></header>
+<main>
+<div id="status" class="note" style="margin-bottom:10px"><span class="tag">LISTO</span> Tablero conectado al Motor V9.28.</div>
+<section id="operacion" class="view on">
+<div class="bar"><div><b>Panorama operacional</b><div class="sub">Lo importante primero; el detalle queda a un toque.</div></div><div class="segment"><button class="on" data-period="7">7 DÍAS</button><button data-period="month">MES ACTUAL</button></div></div>
+<div class="grid">
+<div class="card"><div class="k">ML trazables</div><div class="v" id="opMl">—</div><div class="sub">Evidencia operacional</div></div>
+<div class="card"><div class="k">ML por aclarar</div><div class="v" id="opAcl">—</div><div class="sub">Lectura canónica del Motor</div></div>
+<div class="card"><div class="k">Jornadas</div><div class="v" id="opJor">—</div><div class="sub" id="opTaskSub">Tareas relacionadas</div></div>
+<div class="card"><div class="k">Agua trazable</div><div class="v" id="opM3">—</div><div class="sub">Contexto de ejecución</div></div>
 </div>
+<h2>Requiere atención <span class="tag" id="opAttCount">—</span></h2>
+<div class="attention" id="opAttention"><div class="case info"><strong>Cargando asuntos del Motor…</strong></div></div>
+<div id="cctvPanel">
+<h2>Control CCTV</h2>
+<div id="opCctv" class="cctvbox"><div class="mini"><div class="k">Estado</div><b>—</b><small>Esperando datos</small></div></div>
+</div>
+<h2>Concentraciones</h2><div id="opConcentrations" class="card"><div class="empty">Esperando datos…</div></div>
+</section>
 
+<section id="explorar" class="view">
+<h2 style="margin-top:0">Explorar la operación</h2>
+<input id="globalSearch" class="search" value="WOW 047" aria-label="Buscar" placeholder="Buscar placa o Tarea…">
+<div id="searchResults" class="card" style="display:none;margin-top:8px"></div>
+<div class="chips"><span class="chip">Placa</span><span class="chip">Tarea</span><span class="chip">Contratista</span><span class="chip">Barrio</span><span class="chip">Tramo</span></div>
+<div id="exploreBody"><div class="hero"><div class="k">Consulta</div><div class="title">Escribe una placa o Tarea</div><div class="meta"><span>Datos reales</span><span>Solo lectura</span></div></div></div>
+</section>
+
+<section id="corte" class="view">
+<div class="bar"><div><b>Corte Inteligente por Tarea</b><div class="sub">Resultado del período + historia que continúa.</div></div><span class="tag" id="cutTag">TAREA</span></div>
+<input id="cutSearch" class="search" value="TOP-274A2BA0" aria-label="Tarea" placeholder="ID de Tarea…">
+<div id="cutBody"><div class="hero"><div class="k">Corte</div><div class="title">Consulta una Tarea</div><div class="meta"><span>Datos reales</span><span>Solo lectura</span></div></div></div>
+</section>
+</main></div>
 <script>
 const API='https://script.google.com/macros/s/AKfycbwDy1V9_-gn0p4fNwVFnQJKJgYewW5ZfjmkRJpV8ckUwXzXWExAIgbuw0x-dUXORV4T/exec';
-const $=id=>document.getElementById(id), n=x=>Number.isFinite(Number(x))?Number(x):0;
-const fmt=x=>new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).format(n(x));
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-let mode='7', DATA=null;
-
-function localISO(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
-function rango(){
-  const hoy=new Date(), hasta=new Date(hoy), desde=new Date(hoy);
-  if(mode==='7') desde.setDate(hoy.getDate()-6);
-  else desde.setDate(1);
-  return {desde:localISO(desde),hasta:localISO(hasta)};
-}
-function fechaBonita(s){const d=new Date(String(s).slice(0,10)+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString('es-CO',{day:'numeric',month:'short'})}
+const tabs=[...document.querySelectorAll('.tab')],views=[...document.querySelectorAll('.view')];
+const $=id=>document.getElementById(id);
+function show(id){tabs.forEach(x=>x.classList.toggle('on',x.dataset.v===id));views.forEach(x=>x.classList.toggle('on',x.id===id));window.scrollTo({top:0,behavior:'smooth'});}
+tabs.forEach(x=>x.onclick=()=>show(x.dataset.v));
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(n){return new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).format(Number(n||0))}
+function label(s){return String(s||'').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}
+function ymd(d){return d.toISOString().slice(0,10)}
+function range(kind){let end=new Date(),start=new Date(end);if(kind==='month')start=new Date(end.getFullYear(),end.getMonth(),1);else start.setDate(end.getDate()-6);return {desde:ymd(start),hasta:ymd(end)}}
 function jsonp(params){
  return new Promise((resolve,reject)=>{
-  const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2), s=document.createElement('script');
-  const t=setTimeout(()=>done(new Error('Tiempo de espera agotado')),18000);
-  function done(e,d){clearTimeout(t);delete window[cb];s.remove();e?reject(e):resolve(d)}
-  window[cb]=d=>done(null,d); s.onerror=()=>done(new Error('No fue posible consultar el Motor'));
-  s.src=API+'?'+new URLSearchParams({...params,callback:cb,_:Date.now()}); document.head.appendChild(s);
+  const cb='mtto_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2),s=document.createElement('script');let done=false;
+  const end=()=>{if(done)return;done=true;delete window[cb];s.remove()};
+  window[cb]=r=>{end();resolve(r)};
+  s.onerror=()=>{end();reject(new Error('No fue posible conectar desde esta vista'))};
+  s.src=API+'?'+new URLSearchParams({...params,callback:cb}).toString();
+  document.body.appendChild(s);
+  setTimeout(()=>{if(!done){end();reject(new Error('Tiempo de espera agotado'))}},20000);
  });
 }
-function status(t,e=false){$('status').textContent=t;$('status').className='status'+(e?' err':'')}
-function diffJ(j){return n(j.ML_DECLARADO)-n(j.ML_TRAZABLE)}
-function fechaJ(j){return j.FECHA_INI||j.FECHA||j.FECHA_JORNADA||''}
-function pill(d){return Math.abs(d)<.01?'<span class="pill ok">Conciliado</span>':'<span class="pill warn">Revisar</span>'}
-
-function render(){
- const g=DATA.con.general||{}, js=DATA.jor.jornadas||[], r=rango(), d=n(g.mlDeclarado)-n(g.mlTrazable);
- $('periodoTxt').textContent=(mode==='7'?'Corte móvil · ':'Mes vigente · ')+fechaBonita(r.desde)+' — '+fechaBonita(r.hasta);
- $('mlTra').textContent=fmt(g.mlTrazable); $('mlDec').textContent=fmt(g.mlDeclarado); $('mlAcl').textContent=fmt(d); $('jor').textContent=fmt(g.jornadas);
- $('jorHint').textContent=mode==='7'?'últimos 7 días':'mes vigente';
- $('placas').textContent=fmt(g.placas); $('contratistas').textContent=fmt(g.contratistas); $('frentes').textContent=fmt(g.frentes); $('m3').textContent=fmt(g.m3Trazable)+' m³';
- $('cctvPct').textContent=fmt(g.cctv?.coberturaPct)+'%'; $('cctvPre').textContent=fmt(g.cctv?.mlPresentados); $('cctvIns').textContent=fmt(g.cctv?.mlInspeccionadosUnicos); $('mlInspector').textContent=fmt(g.mlVerificadoInspector);
- renderTree(js); renderAttention(js);
+function simpleObject(o){
+ if(o==null)return '<div class="empty">Sin datos.</div>';
+ if(Array.isArray(o))return o.length?o.map(simpleObject).join(''):'<div class="empty">Sin registros.</div>';
+ if(typeof o!=='object')return '<div class="listrow"><span>Valor</span><b>'+esc(o)+'</b></div>';
+ let direct=Object.entries(o).filter(([k,v])=>v==null||typeof v!=='object');
+ let nested=Object.entries(o).filter(([k,v])=>v&&typeof v==='object');
+ return '<div class="card">'+direct.map(([k,v])=>'<div class="listrow"><span>'+esc(label(k))+'</span><b>'+esc(v??'')+'</b></div>').join('')+'</div>'+
+ nested.map(([k,v])=>'<h3>'+esc(label(k))+'</h3>'+simpleObject(v)).join('');
 }
-
-function renderTree(js){
- const groups={};
- js.forEach(j=>{
-   const c=j.CONTRATISTA||'Sin contratista', b=j.BARRIO||'Sin barrio';
-   groups[c]??={}; groups[c][b]??=[]; groups[c][b].push(j);
- });
- const root=$('tree'), cs=Object.keys(groups).sort();
- if(!cs.length){root.innerHTML='<div class="empty">Sin jornadas en el período.</div>';return}
- root.innerHTML=cs.map((c,ci)=>{
-   const barrios=groups[c], all=Object.values(barrios).flat(), mt=all.reduce((s,j)=>s+n(j.ML_TRAZABLE),0);
-   return `<div class="contractor" id="c${ci}">
-    <button onclick="toggle('c${ci}')"><span>${esc(c)}</span><span>${fmt(mt)} ML · ${all.length} jornadas ▾</span></button>
-    <div class="body">${Object.keys(barrios).sort().map((b,bi)=>{
-      const arr=barrios[b], bt=arr.reduce((s,j)=>s+n(j.ML_TRAZABLE),0), bd=arr.reduce((s,j)=>s+n(j.ML_DECLARADO),0), dif=bd-bt, id=`t${ci}_${bi}`;
-      return `<div class="task" id="${id}">
-       <div class="taskhead"><div><div class="taskname">${esc(b)}</div><div class="mini">${arr.length} jornadas · ${fmt(bt)} ML trazables · diferencia ${fmt(dif)}</div></div>
-       <button class="linkbtn" onclick="toggle('${id}')">Detalle</button></div>
-       <div class="details"><div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Placa</th><th>ML trazables</th><th>ML declarados</th><th>Diferencia</th><th>m³</th></tr></thead>
-       <tbody>${arr.map(j=>`<tr><td>${esc(fechaBonita(fechaJ(j)))}</td><td><b>${esc(j.PLACA||'')}</b></td><td>${fmt(j.ML_TRAZABLE)}</td><td>${fmt(j.ML_DECLARADO)}</td><td>${fmt(diffJ(j))}</td><td>${fmt(j.M3_TRAZABLE)}</td></tr>`).join('')}</tbody></table></div></div>
-      </div>`;
-    }).join('')}</div></div>`;
- }).join('');
-}
-
-function renderAttention(js){
- const arr=js.slice().sort((a,b)=>Math.abs(diffJ(b))-Math.abs(diffJ(a)));
- const attention=arr.filter(j=>Math.abs(diffJ(j))>.01);
- $('attention').innerHTML=(attention.length?attention:arr.slice(0,10)).map(j=>`<tr>
- <td>${esc(fechaBonita(fechaJ(j)))}</td><td><b>${esc(j.PLACA||'')}</b></td><td>${esc(j.CONTRATISTA||'')}</td><td>${esc(j.BARRIO||'')}</td>
- <td>${fmt(j.ML_TRAZABLE)}</td><td>${fmt(j.ML_DECLARADO)}</td><td>${fmt(diffJ(j))}</td><td>${pill(diffJ(j))}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">Sin jornadas.</td></tr>';
-}
-function toggle(id){document.getElementById(id)?.classList.toggle('open')}
-
-async function cargar(){
- const r=rango(); status('Consultando '+(mode==='7'?'los últimos 7 días…':'el mes vigente…'));
+let currentPeriod='7';
+async function loadOperation(){
+ const rge=range(currentPeriod),status=$('status');
+ status.innerHTML='<span class="tag">CONECTANDO</span> Consultando Motor…';
  try{
-  const [con,jor]=await Promise.all([
-   jsonp({action:'oficinaConsolidado',desde:r.desde,hasta:r.hasta}),
-   jsonp({action:'oficinaJornadas',desde:r.desde,hasta:r.hasta})
-  ]);
-  if(!con?.ok)throw new Error(con?.error||'No se obtuvo consolidado');
-  if(!jor?.ok)throw new Error(jor?.error||'No se obtuvieron jornadas');
-  DATA={con,jor}; render(); status('Actualizado · '+fechaBonita(r.desde)+' — '+fechaBonita(r.hasta));
- }catch(e){status('Error: '+e.message,true)}
+  const r=await jsonp({action:'tableroOperacion',...rge});
+  if(!r.ok)throw new Error(r.error||'Respuesta inválida');
+  const z=r.resumen||{};
+  $('opMl').textContent=fmt(z.mlTrazable);$('opAcl').textContent=fmt(z.mlPorAclararCanonico);
+  $('opJor').textContent=fmt(z.jornadas);$('opTaskSub').textContent=fmt(z.tareas)+' tareas relacionadas';
+  $('opM3').textContent=fmt(z.m3Trazable)+' m³';
+  const a=r.atencion||[];$('opAttCount').textContent=a.length;
+  $('opAttention').innerHTML=a.length?a.map(x=>`<div class="case ${x.tipo==='REQUIERE_CONCILIAR_PRODUCCION'?'bad':'info'}" data-q="${esc(x.idTarea||x.placa||'')}"><strong>${esc(label(x.tipo))}${x.valor?' · '+fmt(x.valor)+' '+esc(x.unidad||''):''}</strong><span>${esc([x.placa,x.contratista,x.barrio,x.resumen].filter(Boolean).join(' · '))}</span></div>`).join(''):'<div class="case info"><strong>Sin asuntos que requieran atención</strong><span>Período consultado: '+rge.desde+' → '+rge.hasta+'</span></div>';
+  document.querySelectorAll('#opAttention [data-q]').forEach(x=>x.onclick=()=>{let q=x.dataset.q;if(q){$('globalSearch').value=q;show('explorar');loadExplore(q)}});
+  $('opCctv').innerHTML=r.cctv?simpleObject(r.cctv):'<div class="mini"><div class="k">CCTV</div><b>0</b><small>Sin datos para el período</small></div>';
+  $('opConcentrations').innerHTML=r.concentraciones?simpleObject(r.concentraciones):'<div class="empty">Sin concentraciones.</div>';
+  status.innerHTML='<span class="tag">EN LÍNEA</span> '+esc(r.version||'V9.28')+' · '+rge.desde+' → '+rge.hasta;
+ }catch(e){
+  status.innerHTML='<span class="tag">VISTA LOCAL</span> '+esc(e.message)+'. Si el PING funciona, publica este mismo HTML en GitHub Pages: el diseño no cambia.';
+ }
 }
-function setMode(m){
- mode=m;$('b7').classList.toggle('on',m==='7');$('bm').classList.toggle('on',m==='m');cargar();
+document.querySelectorAll('.segment button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.segment button').forEach(x=>x.classList.remove('on'));b.classList.add('on');currentPeriod=b.dataset.period;loadOperation()});
+
+function renderExplore(r,q){
+ const rel=r.relaciones||{},js=rel.jornadas||[],ts=rel.tareas||[];
+ let last=r.ultimaActividad||js[0]||{};
+ return `<div class="hero"><div class="k">${esc((r.consulta&&r.consulta.tipo)||'Consulta')}</div><div class="title">${esc((r.consulta&&r.consulta.valor)||q)}</div><div class="meta"><span>${js.length} jornada(s)</span><span>${ts.length} tarea(s)</span>${last.fecha?'<span>'+esc(last.fecha)+'</span>':''}</div></div>
+ <h2>Jornadas relacionadas</h2>${js.length?js.map(j=>`<div class="journey"><div class="top"><b>${esc(j.fecha||j.fechaInicio||j.idJornada||'Jornada')}</b><span class="state">${fmt(j.mlTrazable||j.mlEvidencia||0)} ML</span></div><small>${esc([j.placa,j.contratista,j.barrio,j.idTarea].filter(Boolean).join(' · '))}</small></div>`).join(''):'<div class="card"><div class="empty">No hay jornadas relacionadas.</div></div>'}
+ <h2>Relaciones</h2>${simpleObject(rel)}
+ ${r.ultimaActividad?'<h2>Última actividad</h2>'+simpleObject(r.ultimaActividad):''}`;
 }
-$('b7').onclick=()=>setMode('7'); $('bm').onclick=()=>setMode('m');
-cargar();
+async function loadExplore(q){
+ q=(q||$('globalSearch').value).trim();if(!q)return;
+ $('searchResults').style.display='block';$('searchResults').innerHTML='<div class="k">Consultando</div><div class="sub">Buscando en el Motor…</div>';
+ try{
+  const p={action:'tableroExplorar'};/^TOP-/i.test(q)?p.idTarea=q:p.placa=q;
+  const r=await jsonp(p);if(!r.ok)throw new Error(r.error||'No encontrado');
+  $('searchResults').style.display='none';$('exploreBody').innerHTML=renderExplore(r,q);
+ }catch(e){$('searchResults').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
+}
+let timer;$('globalSearch').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>loadExplore(),400)});$('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadExplore()});
+
+function renderCut(r,id){
+ const t=r.tarea||{}, meta=Number(t.metaMl||0);
+ const j=(r.jornadas||r.relaciones?.jornadas||[]);
+ let ml=Number(r.resumen?.mlTrazable||r.produccion?.mlTrazable||0);
+ let pct=meta?Math.min(100,(ml/meta)*100):0;
+ let html=`<div class="hero"><div class="k">${esc([t.nombre,t.barrio,t.contratista].filter(Boolean).join(' · ')||id)}</div><div class="title">${fmt(ml)}${meta?' / '+fmt(meta):''} ML</div>${meta?`<div class="progress"><i style="width:${pct}%"></i></div><div class="meta"><span>${fmt(pct)} %</span><span>${fmt(Math.max(0,meta-ml))} ML restantes</span></div>`:''}</div>`;
+ const order=['resumen','produccion','inspector','cctv','arrastre','pendientes','jornadas'];
+ for(const k of order){if(r[k]!=null)html+=`<h2>${esc(label(k))}</h2>${simpleObject(r[k])}`}
+ for(const [k,v] of Object.entries(r)){if(['ok','soloLectura','version','tarea',...order].includes(k))continue;html+=`<h2>${esc(label(k))}</h2>${simpleObject(v)}`}
+ return html;
+}
+async function loadCut(){
+ const id=$('cutSearch').value.trim();if(!id)return;$('cutTag').textContent=id;$('cutBody').innerHTML='<div class="card"><div class="empty">Consultando Corte…</div></div>';
+ try{const r=await jsonp({action:'tableroCorte',idTarea:id});if(!r.ok)throw new Error(r.error||'Tarea no encontrada');$('cutBody').innerHTML=renderCut(r,id)}
+ catch(e){$('cutBody').innerHTML='<div class="card"><div class="empty">'+esc(e.message)+'</div></div>'}
+}
+$('cutSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadCut()});
+loadOperation();
 </script>
-</body>
-</html>
+</body></html>
