@@ -61,7 +61,7 @@ h2{font-size:17px;margin:20px 0 9px}h3{font-size:15px;margin:0 0 8px}.attention{
 </style>
 </head>
 <body><div class="app">
-<header class="head"><h1>Tablero Operativo · V3</h1><small>Datos reales del Motor · solo lectura</small>
+<header class="head"><h1>Tablero Operativo · V3</h1><small>Datos reales del Motor · solo lectura · conexión V3.1</small>
 <nav class="tabs"><button class="tab on" data-v="operacion">OPERACIÓN</button><button class="tab" data-v="explorar">EXPLORAR</button><button class="tab" data-v="corte">CORTE</button></nav></header>
 <main>
 <div id="status" class="note" style="margin-bottom:10px"><span class="tag">LISTO</span> Tablero conectado al Motor V9.28.</div>
@@ -107,15 +107,29 @@ function fmt(n){return new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).
 function label(s){return String(s||'').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}
 function ymd(d){return d.toISOString().slice(0,10)}
 function range(kind){let end=new Date(),start=new Date(end);if(kind==='month')start=new Date(end.getFullYear(),end.getMonth(),1);else start.setDate(end.getDate()-6);return {desde:ymd(start),hasta:ymd(end)}}
-function jsonp(params){
+async function api(params){
+ const url=API+'?'+new URLSearchParams({...params,_ts:Date.now()}).toString();
+ let fetchError='';
+ try{
+   const res=await fetch(url,{method:'GET',redirect:'follow',cache:'no-store'});
+   if(!res.ok) throw new Error('HTTP '+res.status);
+   const txt=await res.text();
+   try{return JSON.parse(txt)}catch(_){
+     const m=txt.match(/^[\w$.]+\(([\s\S]*)\)\s*;?\s*$/);
+     if(m)return JSON.parse(m[1]);
+     throw new Error('Respuesta no JSON');
+   }
+ }catch(e){fetchError=e.message||String(e)}
  return new Promise((resolve,reject)=>{
-  const cb='mtto_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2),s=document.createElement('script');let done=false;
-  const end=()=>{if(done)return;done=true;delete window[cb];s.remove()};
-  window[cb]=r=>{end();resolve(r)};
-  s.onerror=()=>{end();reject(new Error('No fue posible conectar desde esta vista'))};
-  s.src=API+'?'+new URLSearchParams({...params,callback:cb}).toString();
-  document.body.appendChild(s);
-  setTimeout(()=>{if(!done){end();reject(new Error('Tiempo de espera agotado'))}},20000);
+   const cb='mtto_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+   const s=document.createElement('script'); let done=false;
+   const clean=()=>{if(done)return;done=true;try{delete window[cb]}catch(_){window[cb]=undefined}s.remove()};
+   window[cb]=r=>{clean();resolve(r)};
+   s.async=true; s.referrerPolicy='no-referrer';
+   s.onerror=()=>{clean();reject(new Error('Conexión bloqueada. fetch: '+fetchError+' · JSONP: no cargó'))};
+   s.src=API+'?'+new URLSearchParams({...params,callback:cb,_ts:Date.now()}).toString();
+   document.head.appendChild(s);
+   setTimeout(()=>{if(!done){clean();reject(new Error('Sin respuesta del Motor. fetch: '+fetchError))}},20000);
  });
 }
 function simpleObject(o){
@@ -132,7 +146,7 @@ async function loadOperation(){
  const rge=range(currentPeriod),status=$('status');
  status.innerHTML='<span class="tag">CONECTANDO</span> Consultando Motor…';
  try{
-  const r=await jsonp({action:'tableroOperacion',...rge});
+  const r=await api({action:'tableroOperacion',...rge});
   if(!r.ok)throw new Error(r.error||'Respuesta inválida');
   const z=r.resumen||{};
   $('opMl').textContent=fmt(z.mlTrazable);$('opAcl').textContent=fmt(z.mlPorAclararCanonico);
@@ -145,7 +159,7 @@ async function loadOperation(){
   $('opConcentrations').innerHTML=r.concentraciones?simpleObject(r.concentraciones):'<div class="empty">Sin concentraciones.</div>';
   status.innerHTML='<span class="tag">EN LÍNEA</span> '+esc(r.version||'V9.28')+' · '+rge.desde+' → '+rge.hasta;
  }catch(e){
-  status.innerHTML='<span class="tag">VISTA LOCAL</span> '+esc(e.message)+'. Si el PING funciona, publica este mismo HTML en GitHub Pages: el diseño no cambia.';
+  status.innerHTML='<span class="tag">ERROR DE CONEXIÓN</span> '+esc(e.message);
  }
 }
 document.querySelectorAll('.segment button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.segment button').forEach(x=>x.classList.remove('on'));b.classList.add('on');currentPeriod=b.dataset.period;loadOperation()});
@@ -163,7 +177,7 @@ async function loadExplore(q){
  $('searchResults').style.display='block';$('searchResults').innerHTML='<div class="k">Consultando</div><div class="sub">Buscando en el Motor…</div>';
  try{
   const p={action:'tableroExplorar'};/^TOP-/i.test(q)?p.idTarea=q:p.placa=q;
-  const r=await jsonp(p);if(!r.ok)throw new Error(r.error||'No encontrado');
+  const r=await api(p);if(!r.ok)throw new Error(r.error||'No encontrado');
   $('searchResults').style.display='none';$('exploreBody').innerHTML=renderExplore(r,q);
  }catch(e){$('searchResults').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 }
@@ -182,7 +196,7 @@ function renderCut(r,id){
 }
 async function loadCut(){
  const id=$('cutSearch').value.trim();if(!id)return;$('cutTag').textContent=id;$('cutBody').innerHTML='<div class="card"><div class="empty">Consultando Corte…</div></div>';
- try{const r=await jsonp({action:'tableroCorte',idTarea:id});if(!r.ok)throw new Error(r.error||'Tarea no encontrada');$('cutBody').innerHTML=renderCut(r,id)}
+ try{const r=await api({action:'tableroCorte',idTarea:id});if(!r.ok)throw new Error(r.error||'Tarea no encontrada');$('cutBody').innerHTML=renderCut(r,id)}
  catch(e){$('cutBody').innerHTML='<div class="card"><div class="empty">'+esc(e.message)+'</div></div>'}
 }
 $('cutSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadCut()});
