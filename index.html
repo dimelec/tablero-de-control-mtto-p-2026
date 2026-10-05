@@ -1,160 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Panel Panorámico — Supervisor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>Preventivo · Oficina · Corte</title>
 <style>
-  :root{
-    --bg:#0d0f14; --card:#191c24; --card2:#212531; --line:#2d3340;
-    --text:#f0f1f5; --sub:#9aa0ad; --accent:#f97316; --good:#22c55e;
-    --warn:#f59e0b; --bad:#ef4444; --radius:14px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding-bottom:40px}
-  .container{max-width:600px;margin:0 auto;padding:16px}
-  h1{font-size:20px;margin:0 0 4px}
-  .subtitle{font-size:13px;color:var(--sub);margin-bottom:16px}
-  .card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:12px;border:1px solid var(--line)}
-  .card-title{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
-  .frase{font-size:16px;font-weight:600;line-height:1.5;color:var(--text)}
-  .frase-sub{font-size:13px;color:var(--sub);margin-top:4px}
-  .ok{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)} .info{color:var(--accent)}
-  .status-banner{padding:14px;border-radius:10px;font-weight:700;font-size:15px;text-align:center;margin-bottom:14px}
-  .status-ok{background:#123322;color:var(--good)}
-  .status-warning{background:#3a2410;color:var(--warn)}
-  .status-alert{background:#3a1010;color:var(--bad)}
-  .refresh-btn{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px;font-family:inherit}
-  .auto-refresh-box{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:var(--sub);flex-wrap:wrap}
-  .auto-refresh-box select{padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:12px}
-  .last-update{font-size:11px;color:var(--sub);width:100%}
-  .empty-state{text-align:center;padding:20px;color:var(--sub);font-size:14px}
-  .list-item{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
-  .list-item:last-child{border-bottom:none}
+:root{--blue:#2563eb;--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e7ec;--ok:#087443;--warn:#b54708;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1250px;margin:auto;padding:14px}.head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px}.switch{display:flex;background:#e8eef9;padding:4px;border-radius:12px;gap:4px}
+.switch button{border:0;background:transparent;padding:9px 13px;border-radius:9px;font-weight:800;color:#475467}.switch button.on{background:#fff;color:var(--blue);box-shadow:0 1px 3px #10182822}
+.status{margin:12px 0;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#344054}.status.err{background:#fef3f2;color:var(--bad)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px #1018280d}
+.k{color:var(--muted);font-size:12px;font-weight:700}.v{font-size:24px;font-weight:900;margin-top:3px}.hint{font-size:11px;color:var(--muted)}
+.section{margin-top:12px}.section h2{font-size:16px;margin:0 0 10px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f5}.row:last-child{border-bottom:0}.num{font-variant-numeric:tabular-nums;font-weight:800}
+.pill{display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800}.ok{background:#ecfdf3;color:var(--ok)}.warn{background:#fffaeb;color:var(--warn)}.neutral{background:#f2f4f7;color:#475467}
+.contractor{border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}.contractor>button{width:100%;border:0;background:#fff;padding:13px;display:flex;justify-content:space-between;align-items:center;text-align:left;font-weight:900;color:var(--text)}
+.contractor .body{display:none;padding:0 12px 12px;background:#fff}.contractor.open .body{display:block}.task{padding:11px 0;border-top:1px solid #f0f2f5}.taskhead{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.taskname{font-weight:800}.mini{font-size:12px;color:var(--muted);margin-top:4px}.details{display:none;margin-top:9px;padding:10px;background:#f8fafc;border-radius:10px}.task.open .details{display:block}
+table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:9px;border-bottom:1px solid #f0f2f5;text-align:left;white-space:nowrap}th{font-size:11px;color:#475467;background:#f9fafb}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px}
+button{cursor:pointer}.linkbtn{border:0;background:#eef4ff;color:var(--blue);font-weight:800;padding:7px 9px;border-radius:8px}.empty{padding:20px;text-align:center;color:var(--muted)}
+@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.summary{grid-template-columns:1fr}.wrap{padding:10px}.v{font-size:21px}}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>📊 Panel Panorámico</h1>
-  <div class="subtitle" id="last-update">🕐 Actualizado: —</div>
-  <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar</button>
-  <div class="auto-refresh-box">
-    <span>Auto-recarga:</span>
-    <select id="auto-refresh-select" onchange="cambiarAutoRefresh()">
-      <option value="0">Desactivada</option><option value="60">1 minuto</option>
-      <option value="300" selected>5 minutos</option><option value="600">10 minutos</option>
-    </select>
+<div class="wrap">
+  <div class="head">
+    <div><h1>Mantenimiento Preventivo · Oficina</h1><div class="sub" id="periodoTxt">Corte móvil</div></div>
+    <div class="switch">
+      <button id="b7" class="on">7 DÍAS</button>
+      <button id="bm">MES ACTUAL</button>
+    </div>
   </div>
 
-  <div id="estado-general"></div>
+  <div id="status" class="status">Consultando Motor…</div>
 
-  <div class="card"><div class="card-title">1️⃣ Ahora — contexto operativo</div><div id="ahora-content"></div></div>
-  <div class="card"><div class="card-title">2️⃣ Ayer — contexto de cierre</div><div id="ayer-content"></div></div>
-  <div class="card"><div class="card-title">3️⃣ Meta — ¿vamos a cumplir?</div><div id="meta-content"></div></div>
-  <div class="card"><div class="card-title">4️⃣ Ritmo semanal</div><div id="semana-content"></div></div>
-  <div class="card"><div class="card-title">5️⃣ Flota — salud de placas</div><div id="flota-content"></div></div>
-  <div class="card"><div class="card-title">6️⃣ Puntos críticos</div><div id="criticos-content"></div></div>
-  <div class="card"><div class="card-title">7️⃣ Trazabilidad</div><div id="trazabilidad-content"></div></div>
+  <div class="cards">
+    <div class="card"><div class="k">ML TRAZABLES</div><div class="v" id="mlTra">—</div><div class="hint">evidencia operativa</div></div>
+    <div class="card"><div class="k">ML DECLARADOS</div><div class="v" id="mlDec">—</div><div class="hint">cierre declarado</div></div>
+    <div class="card"><div class="k">ML POR ACLARAR</div><div class="v" id="mlAcl">—</div><div class="hint">diferencia de referencia</div></div>
+    <div class="card"><div class="k">JORNADAS</div><div class="v" id="jor">—</div><div class="hint" id="jorHint">del corte</div></div>
+  </div>
+
+  <div class="section summary">
+    <div class="card">
+      <h2>Lectura del período</h2>
+      <div class="row"><span>Placas activas</span><span class="num" id="placas">—</span></div>
+      <div class="row"><span>Contratistas</span><span class="num" id="contratistas">—</span></div>
+      <div class="row"><span>Frentes / barrios</span><span class="num" id="frentes">—</span></div>
+      <div class="row"><span>Agua trazable</span><span class="num" id="m3">—</span></div>
+    </div>
+    <div class="card">
+      <h2>CCTV e Inspector</h2>
+      <div class="row"><span>Cobertura CCTV</span><span class="num" id="cctvPct">—</span></div>
+      <div class="row"><span>ML presentados CCTV</span><span class="num" id="cctvPre">—</span></div>
+      <div class="row"><span>ML inspeccionados únicos</span><span class="num" id="cctvIns">—</span></div>
+      <div class="row"><span>ML verificados Inspector</span><span class="num" id="mlInspector">—</span></div>
+    </div>
+  </div>
+
+  <div class="section card">
+    <h2>Contratistas → tareas / frentes</h2>
+    <div class="sub">Abre un contratista y luego un frente para ver sus jornadas. Esta vista no modifica datos.</div>
+    <div id="tree"></div>
+  </div>
+
+  <div class="section card">
+    <h2>Jornadas que requieren atención</h2>
+    <div class="sub">Se muestran primero las jornadas cuya diferencia declarada vs. trazable no es cero.</div>
+    <div class="tablewrap" style="margin-top:9px">
+      <table>
+        <thead><tr><th>Fecha</th><th>Placa</th><th>Contratista</th><th>Barrio</th><th>ML trazables</th><th>ML declarados</th><th>Diferencia</th><th>Lectura</th></tr></thead>
+        <tbody id="attention"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
-const BASE_URL = "https://script.google.com/macros/s/AKfycbx-XsHvSN2pyV2J_IBN-pb6hcF0k8e3mU4UPVlqhV28kC1puqFZH9gXmrm9P8fBIekIcw/exec";
-let autoRefreshInterval = null;
+const API='https://script.google.com/macros/s/AKfycbwDy1V9_-gn0p4fNwVFnQJKJgYewW5ZfjmkRJpV8ckUwXzXWExAIgbuw0x-dUXORV4T/exec';
+const $=id=>document.getElementById(id), n=x=>Number.isFinite(Number(x))?Number(x):0;
+const fmt=x=>new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).format(n(x));
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let mode='7', DATA=null;
 
-function cambiarAutoRefresh(){
-  const s = parseInt(document.getElementById('auto-refresh-select').value);
-  if(autoRefreshInterval) clearInterval(autoRefreshInterval);
-  if(s > 0) autoRefreshInterval = setInterval(cargarDatos, s * 1000);
+function localISO(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function rango(){
+  const hoy=new Date(), hasta=new Date(hoy), desde=new Date(hoy);
+  if(mode==='7') desde.setDate(hoy.getDate()-6);
+  else desde.setDate(1);
+  return {desde:localISO(desde),hasta:localISO(hasta)};
+}
+function fechaBonita(s){const d=new Date(String(s).slice(0,10)+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString('es-CO',{day:'numeric',month:'short'})}
+function jsonp(params){
+ return new Promise((resolve,reject)=>{
+  const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2), s=document.createElement('script');
+  const t=setTimeout(()=>done(new Error('Tiempo de espera agotado')),18000);
+  function done(e,d){clearTimeout(t);delete window[cb];s.remove();e?reject(e):resolve(d)}
+  window[cb]=d=>done(null,d); s.onerror=()=>done(new Error('No fue posible consultar el Motor'));
+  s.src=API+'?'+new URLSearchParams({...params,callback:cb,_:Date.now()}); document.head.appendChild(s);
+ });
+}
+function status(t,e=false){$('status').textContent=t;$('status').className='status'+(e?' err':'')}
+function diffJ(j){return n(j.ML_DECLARADO)-n(j.ML_TRAZABLE)}
+function fechaJ(j){return j.FECHA_INI||j.FECHA||j.FECHA_JORNADA||''}
+function pill(d){return Math.abs(d)<.01?'<span class="pill ok">Conciliado</span>':'<span class="pill warn">Revisar</span>'}
+
+function render(){
+ const g=DATA.con.general||{}, js=DATA.jor.jornadas||[], r=rango(), d=n(g.mlDeclarado)-n(g.mlTrazable);
+ $('periodoTxt').textContent=(mode==='7'?'Corte móvil · ':'Mes vigente · ')+fechaBonita(r.desde)+' — '+fechaBonita(r.hasta);
+ $('mlTra').textContent=fmt(g.mlTrazable); $('mlDec').textContent=fmt(g.mlDeclarado); $('mlAcl').textContent=fmt(d); $('jor').textContent=fmt(g.jornadas);
+ $('jorHint').textContent=mode==='7'?'últimos 7 días':'mes vigente';
+ $('placas').textContent=fmt(g.placas); $('contratistas').textContent=fmt(g.contratistas); $('frentes').textContent=fmt(g.frentes); $('m3').textContent=fmt(g.m3Trazable)+' m³';
+ $('cctvPct').textContent=fmt(g.cctv?.coberturaPct)+'%'; $('cctvPre').textContent=fmt(g.cctv?.mlPresentados); $('cctvIns').textContent=fmt(g.cctv?.mlInspeccionadosUnicos); $('mlInspector').textContent=fmt(g.mlVerificadoInspector);
+ renderTree(js); renderAttention(js);
 }
 
-async function cargarDatos(){
-  try{
-    const resp = await fetch(BASE_URL + '?action=dashboard');
-    const d = await resp.json();
-    if(d.ok){
-      procesarDatos(d);
-      document.getElementById('last-update').textContent = '🕐 Actualizado: ' + (d.ACTUALIZADO || '—');
-    } else {
-      document.getElementById('estado-general').innerHTML = '<div class="status-banner status-alert">🔴 ' + (d.error || 'Sin datos') + '</div>';
-    }
-  }catch(e){
-    document.getElementById('estado-general').innerHTML = '<div class="status-banner status-alert">🔴 Error de conexión</div>';
-  }
+function renderTree(js){
+ const groups={};
+ js.forEach(j=>{
+   const c=j.CONTRATISTA||'Sin contratista', b=j.BARRIO||'Sin barrio';
+   groups[c]??={}; groups[c][b]??=[]; groups[c][b].push(j);
+ });
+ const root=$('tree'), cs=Object.keys(groups).sort();
+ if(!cs.length){root.innerHTML='<div class="empty">Sin jornadas en el período.</div>';return}
+ root.innerHTML=cs.map((c,ci)=>{
+   const barrios=groups[c], all=Object.values(barrios).flat(), mt=all.reduce((s,j)=>s+n(j.ML_TRAZABLE),0);
+   return `<div class="contractor" id="c${ci}">
+    <button onclick="toggle('c${ci}')"><span>${esc(c)}</span><span>${fmt(mt)} ML · ${all.length} jornadas ▾</span></button>
+    <div class="body">${Object.keys(barrios).sort().map((b,bi)=>{
+      const arr=barrios[b], bt=arr.reduce((s,j)=>s+n(j.ML_TRAZABLE),0), bd=arr.reduce((s,j)=>s+n(j.ML_DECLARADO),0), dif=bd-bt, id=`t${ci}_${bi}`;
+      return `<div class="task" id="${id}">
+       <div class="taskhead"><div><div class="taskname">${esc(b)}</div><div class="mini">${arr.length} jornadas · ${fmt(bt)} ML trazables · diferencia ${fmt(dif)}</div></div>
+       <button class="linkbtn" onclick="toggle('${id}')">Detalle</button></div>
+       <div class="details"><div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Placa</th><th>ML trazables</th><th>ML declarados</th><th>Diferencia</th><th>m³</th></tr></thead>
+       <tbody>${arr.map(j=>`<tr><td>${esc(fechaBonita(fechaJ(j)))}</td><td><b>${esc(j.PLACA||'')}</b></td><td>${fmt(j.ML_TRAZABLE)}</td><td>${fmt(j.ML_DECLARADO)}</td><td>${fmt(diffJ(j))}</td><td>${fmt(j.M3_TRAZABLE)}</td></tr>`).join('')}</tbody></table></div></div>
+      </div>`;
+    }).join('')}</div></div>`;
+ }).join('');
 }
 
-function procesarDatos(d){
-  // Semáforo general
-  const alcanzaMes = d.MES_ALCANZA === 'SI';
-  const alcanzaAnio = d.ANIO_ALCANZA === 'SI';
-  const pendientes = (d.pendientes || []).length;
-  const flotaProblemas = (d.flota_problemas || []).length;
-  const criticos = (d.tramos_criticos || []).length;
-  const manuales = Number(d.ORIGEN_MANUAL_COUNT) || 0;
-
-  let estadoHTML = '';
-  if(!alcanzaMes || !alcanzaAnio || flotaProblemas > 0 || criticos > 0){
-    estadoHTML = '<div class="status-banner status-alert">🔴 Atención: requiere intervención</div>';
-  } else if(pendientes > 0 || manuales > 0){
-    estadoHTML = '<div class="status-banner status-warning">🟡 Hay pendientes o datos manuales</div>';
-  } else {
-    estadoHTML = '<div class="status-banner status-ok">✅ Operación estable y en meta</div>';
-  }
-  document.getElementById('estado-general').innerHTML = estadoHTML;
-
-  // 1. Ahora
-  document.getElementById('ahora-content').innerHTML =
-    '<div class="frase">' + (d.AHORA_RESUMEN || 'Sin turno activo') + '</div>' +
-    '<div class="frase-sub">Último hito: ' + (d.AHORA_ULTIMO_HITO || '—') + '</div>';
-
-  // 2. Ayer
-  document.getElementById('ayer-content').innerHTML =
-    '<div class="frase">' + (d.AYER_RESUMEN || 'Sin turnos cerrados ayer') + '</div>';
-
-  // 3. Meta
-  document.getElementById('meta-content').innerHTML =
-    '<div class="frase">Mes: faltan <span class="' + (alcanzaMes?'ok':'bad') + '">' + (d.MES_FALTA_ML||0) + ' ML</span> = ' + (d.MES_TURNOS_EQUIV||0) + ' turnos → ' + (alcanzaMes?'✅ Alcanza':'❌ No alcanza') + '</div>' +
-    '<div class="frase" style="margin-top:8px;">Año: faltan <span class="' + (alcanzaAnio?'ok':'bad') + '">' + (d.ANIO_FALTA_ML||0) + ' ML</span> = ' + (d.ANIO_TURNOS_EQUIV||0) + ' turnos → ' + (alcanzaAnio?'✅ Alcanza':'❌ No alcanza') + '</div>';
-
-  // 4. Semana
-  const sem = d.SEMANA_TEXTO || '—';
-  document.getElementById('semana-content').innerHTML =
-    '<div class="frase ' + (sem.indexOf('+') !== -1 ? 'ok' : 'bad') + '">' + sem + '</div>';
-
-  // 5. Flota
-  const flota = d.flota_problemas || [];
-  if(flota.length === 0){
-    document.getElementById('flota-content').innerHTML = '<div class="empty-state">✅ Flota saludable</div>';
-  } else {
-    let html = '';
-    flota.forEach(f => {
-      html += '<div class="list-item">🔧 <b>' + f.placa + '</b>: ' + f.pct_falla + '% falla (' + f.averias + ' averías en ' + f.turnos + ' turnos)</div>';
-    });
-    document.getElementById('flota-content').innerHTML = html;
-  }
-
-  // 6. Puntos críticos
-  const criticos = d.tramos_criticos || [];
-  if(criticos.length === 0){
-    document.getElementById('criticos-content').innerHTML = '<div class="empty-state">✅ Sin puntos críticos</div>';
-  } else {
-    let html = '';
-    criticos.forEach(c => {
-      html += '<div class="list-item">📍 <b>' + c.tramo + '</b>: ' + c.cctv_no + ' CCTV=NO + ' + c.desobs + ' desobstrucciones (puntuación ' + c.puntuacion + ')</div>';
-    });
-    document.getElementById('criticos-content').innerHTML = html;
-  }
-
-  // 7. Trazabilidad
-  document.getElementById('trazabilidad-content').innerHTML =
-    '<div class="frase">Confiabilidad: ' + (d.CONFIABILIDAD_PCT || '—') + '</div>' +
-    '<div class="frase-sub">' + (manuales > 0 ? '⚠️ ' + manuales + ' turno(s) manual(es)' : '✅ Sin datos manuales') + '</div>' +
-    '<div class="frase-sub">Decisiones pendientes: ' + pendientes + '</div>';
+function renderAttention(js){
+ const arr=js.slice().sort((a,b)=>Math.abs(diffJ(b))-Math.abs(diffJ(a)));
+ const attention=arr.filter(j=>Math.abs(diffJ(j))>.01);
+ $('attention').innerHTML=(attention.length?attention:arr.slice(0,10)).map(j=>`<tr>
+ <td>${esc(fechaBonita(fechaJ(j)))}</td><td><b>${esc(j.PLACA||'')}</b></td><td>${esc(j.CONTRATISTA||'')}</td><td>${esc(j.BARRIO||'')}</td>
+ <td>${fmt(j.ML_TRAZABLE)}</td><td>${fmt(j.ML_DECLARADO)}</td><td>${fmt(diffJ(j))}</td><td>${pill(diffJ(j))}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">Sin jornadas.</td></tr>';
 }
+function toggle(id){document.getElementById(id)?.classList.toggle('open')}
 
-window.addEventListener('load', () => {
-  cargarDatos();
-  cambiarAutoRefresh();
-});
+async function cargar(){
+ const r=rango(); status('Consultando '+(mode==='7'?'los últimos 7 días…':'el mes vigente…'));
+ try{
+  const [con,jor]=await Promise.all([
+   jsonp({action:'oficinaConsolidado',desde:r.desde,hasta:r.hasta}),
+   jsonp({action:'oficinaJornadas',desde:r.desde,hasta:r.hasta})
+  ]);
+  if(!con?.ok)throw new Error(con?.error||'No se obtuvo consolidado');
+  if(!jor?.ok)throw new Error(jor?.error||'No se obtuvieron jornadas');
+  DATA={con,jor}; render(); status('Actualizado · '+fechaBonita(r.desde)+' — '+fechaBonita(r.hasta));
+ }catch(e){status('Error: '+e.message,true)}
+}
+function setMode(m){
+ mode=m;$('b7').classList.toggle('on',m==='7');$('bm').classList.toggle('on',m==='m');cargar();
+}
+$('b7').onclick=()=>setMode('7'); $('bm').onclick=()=>setMode('m');
+cargar();
 </script>
 </body>
 </html>
